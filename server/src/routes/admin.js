@@ -1,7 +1,7 @@
 // server/routes/admin.js
 const express = require('express');
 const { protect, authorizeRoles } = require('../middleware/auth');
-const { getAllUsers, deleteUser, getAdminStats } = require('../controllers/adminController');
+const { getAllUsers, deleteUser, getAdminStats } = require('../controllers/admincontroller');
 const router = express.Router();
 
 const adminProtect = [protect, authorizeRoles('admin', 'super_admin')];

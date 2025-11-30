@@ -6,7 +6,7 @@ const {
     getOwnerComplaints,
     updateComplaintStatus,
     getTenantComplaints
-} = require('../controllers/complaintController'); 
+} = require('../controllers/complaintcontroller'); 
 
 const router = express.Router();
 
