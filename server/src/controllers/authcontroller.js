@@ -42,7 +42,6 @@ exports.registerUser = async (req, res) => {
         
         // Set default profiles based on role
         const ownerProfile = role === 'pg_owner' ? { companyName: `${sanitizedName}'s PGs` } : undefined;
-        const tenantProfile = role === 'tenant' ? { pgName: pgName || '' } : undefined;
         
         // Default role is 'pg_owner' if not specified or invalid
         const userRole = ['super_admin', 'admin', 'pg_owner', 'tenant'].includes(role) ? role : 'pg_owner';
@@ -52,9 +51,24 @@ exports.registerUser = async (req, res) => {
             email: sanitizedEmail,
             password,
             role: userRole,
-            ownerProfile,
-            tenantProfile
+            ownerProfile
         });
+        
+        // If tenant registration, create initial Tenant record with PG selection
+        if (role === 'tenant' && pgName) {
+            const Tenant = require('../models/Tenant');
+            const Property = require('../models/Property');
+            
+            const property = await Property.findOne({ title: pgName });
+            await Tenant.create({
+                name: sanitizedName,
+                email: sanitizedEmail,
+                userId: user._id,
+                propertyId: property?._id,
+                ownerId: property?.ownerId,
+                status: 'profile_incomplete'
+            });
+        }
 
         res.status(201).json({
             _id: user._id,

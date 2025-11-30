@@ -35,6 +35,9 @@ const OnboardTenantModal = ({ onClose, onSuccess }) => {
                     axios.get('http://localhost:5000/api/owner/available-tenants', config)
                 ]);
                 
+                // console.log('Rooms data:', roomsRes.data);
+                // console.log('Tenants data:', tenantsRes.data);
+                
                 // Filter rooms to only show those with capacity
                 const openRooms = roomsRes.data.filter(r => r.currentOccupancy < r.capacity);
                 setAvailableRooms(openRooms);
@@ -51,6 +54,8 @@ const OnboardTenantModal = ({ onClose, onSuccess }) => {
                 if (tenantsRes.data.length === 1) {
                     setFormData(prev => ({ ...prev, tenantId: tenantsRes.data[0]._id }));
                     setSearchTerm(tenantsRes.data[0].name);
+                } else if (tenantsRes.data.length === 0) {
+                    setError('No available tenants found. Tenants must complete their profile first.');
                 }
 
             } catch (err) {
@@ -97,6 +102,7 @@ const OnboardTenantModal = ({ onClose, onSuccess }) => {
 
         try {
             const config = { headers: { Authorization: `Bearer ${user.token}` } };
+            console.log('Submitting form data:', formData);
             const res = await axios.post('http://localhost:5000/api/owner/assign-tenant-room', formData, config);
             
             setSuccessMessage(`Tenant successfully assigned to room!`);
@@ -143,6 +149,14 @@ const OnboardTenantModal = ({ onClose, onSuccess }) => {
             <div className="bg-white p-6 rounded-xl shadow-2xl w-full max-w-lg overflow-y-auto max-h-[90vh]">
                 <h3 className="text-2xl font-bold mb-4 text-primary-dark border-b pb-2">Assign Tenant to Room</h3>
                 
+                {/* Debug Info 
+                <div className="bg-blue-50 p-3 rounded mb-4 text-xs">
+                    <div>Available Tenants: {availableTenants.length}</div>
+                    <div>Available Rooms: {availableRooms.length}</div>
+                    <div>Selected Tenant ID: {formData.tenantId}</div>
+                    <div>Selected Room ID: {formData.roomId}</div>
+                </div>*/}
+                
                 {successMessage && (
                     <div className="bg-green-100 text-accent-green p-4 rounded-md mb-4 text-sm">{successMessage}</div>
                 )}
@@ -155,34 +169,43 @@ const OnboardTenantModal = ({ onClose, onSuccess }) => {
                     {/* Tenant Selection */}
                     <div className="relative">
                         <label className="block text-sm font-medium text-gray-700 mb-2">Select Tenant</label>
-                        <div className="relative">
-                            <input
-                                type="text"
-                                value={searchTerm}
-                                onChange={(e) => {
-                                    setSearchTerm(e.target.value);
-                                    setShowDropdown(true);
-                                }}
-                                onFocus={() => setShowDropdown(true)}
-                                placeholder="Search tenant by name or email"
-                                className="w-full px-3 py-2 border rounded-md pr-10"
-                                required
-                            />
-                            <MagnifyingGlassIcon className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
-                        </div>
-                        
-                        {showDropdown && filteredTenants.length > 0 && (
-                            <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
-                                {filteredTenants.map(tenant => (
-                                    <div
-                                        key={tenant._id}
-                                        onClick={() => handleTenantSelect(tenant)}
-                                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer border-b last:border-b-0"
-                                    >
-                                        <div className="font-medium">{tenant.name}</div>
-                                        <div className="text-sm text-gray-600">{tenant.email}</div>
+                        {availableTenants.length === 1 ? (
+                            // Show single tenant info when only one available
+                            <div className="w-full px-3 py-2 border rounded-md bg-gray-50">
+                                <div className="font-medium">{availableTenants[0].name}</div>
+                                <div className="text-sm text-gray-600">{availableTenants[0].email}</div>
+                            </div>
+                        ) : (
+                            // Show dropdown when multiple tenants available
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    value={searchTerm}
+                                    onChange={(e) => {
+                                        setSearchTerm(e.target.value);
+                                        setShowDropdown(true);
+                                    }}
+                                    onFocus={() => setShowDropdown(true)}
+                                    placeholder="Search tenant by name or email"
+                                    className="w-full px-3 py-2 border rounded-md pr-10"
+                                    required
+                                />
+                                <MagnifyingGlassIcon className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
+                                
+                                {showDropdown && filteredTenants.length > 0 && (
+                                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                                        {filteredTenants.map(tenant => (
+                                            <div
+                                                key={tenant._id}
+                                                onClick={() => handleTenantSelect(tenant)}
+                                                className="px-4 py-2 hover:bg-gray-100 cursor-pointer border-b last:border-b-0"
+                                            >
+                                                <div className="font-medium">{tenant.name}</div>
+                                                <div className="text-sm text-gray-600">{tenant.email}</div>
+                                            </div>
+                                        ))}
                                     </div>
-                                ))}
+                                )}
                             </div>
                         )}
                     </div>

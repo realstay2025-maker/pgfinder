@@ -19,8 +19,8 @@ const ownerProtect = [protect, authorizeRoles('pg_owner')];
 router.post('/', ownerProtect, upload, createProperty);
 router.get('/my', ownerProtect, getMyProperties);
 router.get('/metrics/owner', ownerProtect, getOwnerMetrics);
-
 router.get('/owner/roster', ownerProtect, getRoomRoster);
+router.get('/owner', ownerProtect, getMyProperties);
 router.get('/:id', ownerProtect, getPropertyById);
 router.put('/:id', ownerProtect, updateProperty);
 router.delete('/:id', ownerProtect, deleteProperty);

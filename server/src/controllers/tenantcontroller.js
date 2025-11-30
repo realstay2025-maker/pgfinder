@@ -1,123 +1,123 @@
-// server/controllers/tenantController.js
-const User = require('../models/User');
+const Invoice = require('../models/Invoice');
+const Payment = require('../models/Payment');
+const Tenant = require('../models/Tenant');
 const Property = require('../models/Property');
+const Room = require('../models/Room');
+const puppeteer = require('puppeteer');
 
-// @desc    Get tenant profile
-// @route   GET /api/tenant/profile
-// @access  Private (Tenant)
-exports.getTenantProfile = async (req, res) => {
+// Get tenant invoices
+const getTenantInvoices = async (req, res) => {
     try {
-        const user = await User.findById(req.user._id).select('-password');
-        res.status(200).json(user.tenantProfile);
-    } catch (err) {
-        console.error('Get Tenant Profile Error:', err);
-        res.status(500).json({ error: 'Failed to fetch profile', details: err.message });
-    }
-};
-
-// @desc    Update tenant profile
-// @route   PUT /api/tenant/profile
-// @access  Private (Tenant)
-exports.updateTenantProfile = async (req, res) => {
-    try {
-        const { phone, address, emergencyContact, occupation } = req.body;
-        
-        const user = await User.findById(req.user._id);
-        if (!user) {
-            return res.status(404).json({ error: 'User not found' });
-        }
-        
-        // Update tenant profile
-        user.tenantProfile.phone = phone;
-        user.tenantProfile.address = address;
-        user.tenantProfile.emergencyContact = emergencyContact;
-        user.tenantProfile.occupation = occupation;
-        
-        // Mark profile as completed if all required fields are filled
-        const isCompleted = phone && address && emergencyContact && occupation;
-        user.tenantProfile.profileCompleted = isCompleted;
-        
-        await user.save();
-        
-        res.status(200).json({ 
-            message: 'Profile updated successfully', 
-            profileCompleted: isCompleted,
-            profile: user.tenantProfile 
-        });
-        
-    } catch (err) {
-        console.error('Update Tenant Profile Error:', err);
-        res.status(500).json({ error: 'Failed to update profile', details: err.message });
-    }
-};
-
-// @desc    Get available properties for tenant registration
-// @route   GET /api/tenant/available-properties
-// @access  Private (Tenant)
-exports.getAvailableProperties = async (req, res) => {
-    try {
-        // Only show approved properties with available beds
-        const properties = await Property.find({ status: 'approved' })
-            .select('title address roomTypes')
-            .lean();
-        
-        // Filter properties that have available beds
-        const availableProperties = properties.filter(property => {
-            return property.roomTypes.some(roomType => {
-                const bedsPerRoom = { single: 1, double: 2, triple: 3, quad: 4 };
-                const totalBeds = (roomType.availableCount || 0) * (bedsPerRoom[roomType.type] || 1);
-                const occupiedBeds = roomType.occupiedBeds || 0;
-                return totalBeds > occupiedBeds;
-            });
-        });
-        
-        res.status(200).json(availableProperties);
-        
-    } catch (err) {
-        console.error('Get Available Properties Error:', err);
-        res.status(500).json({ error: 'Failed to fetch properties', details: err.message });
-    }
-};
-
-// @desc    Get tenant lease info
-// @route   GET /api/tenant/my-lease-info
-// @access  Private (Tenant)
-exports.getTenantLeaseInfo = async (req, res) => {
-    try {
-        const user = await User.findById(req.user._id).select('tenantProfile');
-        
-        if (!user || !user.tenantProfile.isAssigned) {
-            return res.status(200).json({
-                propertyName: user?.tenantProfile?.pgName || 'Not Assigned',
-                roomNumber: 'Pending Assignment',
-                isAssigned: false
-            });
-        }
-        
-        // Get tenant details from Tenant collection
-        const tenant = await Tenant.findOne({ 
-            email: req.user.email, 
-            status: 'active' 
-        }).populate('propertyId', 'title').populate('roomId', 'roomNumber');
-        
+        // Find tenant by user email
+        const tenant = await Tenant.findOne({ email: req.user.email });
         if (!tenant) {
-            return res.status(200).json({
-                propertyName: user.tenantProfile.pgName || 'Not Assigned',
-                roomNumber: 'Pending Assignment',
-                isAssigned: false
-            });
+            return res.status(404).json({ error: 'Tenant not found' });
         }
         
-        res.status(200).json({
-            propertyName: tenant.propertyId?.title || 'Unknown Property',
-            roomNumber: tenant.roomId?.roomNumber || tenant.bedId || 'Unknown Room',
-            isAssigned: true,
-            rent: tenant.rent,
-            moveInDate: tenant.createdAt
-        });
-        
+        const invoices = await Invoice.find({ tenantId: tenant._id })
+            .populate('propertyId', 'title address')
+            .populate('paymentId', 'paidDate')
+            .sort({ createdAt: -1 });
+            
+        res.json(invoices);
     } catch (err) {
-        console.error('Get Tenant Lease Info Error:', err);
-        res.status(500).json({ error: 'Failed to fetch lease info', details: err.message });
+        res.status(500).json({ error: 'Failed to fetch invoices' });
     }
 };
+
+// Generate PDF invoice
+const generateInvoicePDF = async (req, res) => {
+    try {
+        const { invoiceId } = req.params;
+        
+        const invoice = await Invoice.findById(invoiceId)
+            .populate('tenantId', 'name email phone')
+            .populate('propertyId', 'title address')
+            .populate('paymentId', 'paidDate paymentMethod');
+            
+        if (!invoice) {
+            return res.status(404).json({ error: 'Invoice not found' });
+        }
+        
+        // HTML template for PDF
+        const invoiceHTML = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 40px; color: #333; }
+                .header { text-align: center; margin-bottom: 40px; border-bottom: 2px solid #4F46E5; padding-bottom: 20px; }
+                .invoice-title { color: #4F46E5; font-size: 28px; margin: 0; }
+                .invoice-number { color: #666; margin: 10px 0; }
+                .section { margin-bottom: 30px; }
+                .section-title { color: #4F46E5; font-size: 18px; margin-bottom: 15px; border-bottom: 1px solid #E5E7EB; padding-bottom: 5px; }
+                .detail-row { margin: 8px 0; }
+                .amount { font-size: 24px; font-weight: bold; color: #059669; background: #F0FDF4; padding: 15px; border-radius: 8px; text-align: center; }
+                .footer { margin-top: 50px; text-align: center; color: #666; font-style: italic; }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1 class="invoice-title">PAYMENT INVOICE</h1>
+                <p class="invoice-number">Invoice #: ${invoice.invoiceNumber}</p>
+            </div>
+            
+            <div class="section">
+                <h3 class="section-title">Tenant Details</h3>
+                <div class="detail-row"><strong>Name:</strong> ${invoice.tenantId.name}</div>
+                <div class="detail-row"><strong>Email:</strong> ${invoice.tenantId.email}</div>
+                <div class="detail-row"><strong>Phone:</strong> ${invoice.tenantId.phone}</div>
+            </div>
+            
+            <div class="section">
+                <h3 class="section-title">Property Details</h3>
+                <div class="detail-row"><strong>Property:</strong> ${invoice.propertyId.title}</div>
+                <div class="detail-row"><strong>Address:</strong> ${invoice.propertyId.address.line1}, ${invoice.propertyId.address.city}</div>
+            </div>
+            
+            <div class="section">
+                <h3 class="section-title">Payment Details</h3>
+                <div class="detail-row"><strong>Period:</strong> ${invoice.month}/${invoice.year}</div>
+                <div class="detail-row"><strong>Payment Date:</strong> ${new Date(invoice.paymentId.paidDate).toLocaleDateString()}</div>
+                <div class="detail-row"><strong>Payment Method:</strong> ${invoice.paymentId.paymentMethod}</div>
+            </div>
+            
+            <div class="amount">
+                <strong>Amount Paid: ₹${invoice.amount.toLocaleString()}</strong>
+            </div>
+            
+            <div class="footer">
+                <p>Thank you for your payment!</p>
+                <p>Generated on: ${new Date().toLocaleDateString()}</p>
+            </div>
+        </body>
+        </html>`;
+        
+        // Generate PDF using Puppeteer
+        const browser = await puppeteer.launch({ headless: true });
+        const page = await browser.newPage();
+        await page.setContent(invoiceHTML);
+        const pdfBuffer = await page.pdf({ 
+            format: 'A4',
+            printBackground: true,
+            margin: { top: '20px', bottom: '20px', left: '20px', right: '20px' }
+        });
+        await browser.close();
+        
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="invoice-${invoice.invoiceNumber}.pdf"`);
+        res.send(pdfBuffer);
+        
+        // Update invoice status
+        await Invoice.findByIdAndUpdate(invoiceId, { status: 'downloaded' });
+        
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to generate invoice PDF' });
+    }
+};
+
+module.exports = {
+    getTenantInvoices,
+    generateInvoicePDF
+};
+

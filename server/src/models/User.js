@@ -30,18 +30,6 @@ const UserSchema = new mongoose.Schema({
         companyName: { type: String, trim: true },
         pgCount: { type: Number, default: 0 }
     },
-    // Tenant-specific fields
-    tenantProfile: {
-        pgName: { type: String },
-        pgId: { type: mongoose.Schema.Types.ObjectId, ref: 'Property' },
-        roomId: { type: mongoose.Schema.Types.ObjectId, ref: 'Room' },
-        phone: { type: String },
-        address: { type: String },
-        emergencyContact: { type: String },
-        occupation: { type: String },
-        profileCompleted: { type: Boolean, default: false },
-        isAssigned: { type: Boolean, default: false }
-    },
     // Security fields
     passwordChangedAt: { type: Date },
     lastLogin: { type: Date },

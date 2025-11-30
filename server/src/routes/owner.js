@@ -9,7 +9,11 @@ const {
     updateBookingRequest,
     convertBookingToTenant,
     getAvailableTenants,
-    assignTenantToRoom
+    assignTenantToRoom,
+    removeTenantFromRoom,
+    getTenantsWithPayments,
+    sendPaymentReminder,
+    updatePaymentStatus
 } = require('../controllers/ownercontroller');
 
 const router = express.Router();
@@ -29,5 +33,13 @@ router.post('/booking-requests/:id/convert', ownerProtect, convertBookingToTenan
 // Tenant Management
 router.get('/available-tenants', ownerProtect, getAvailableTenants);
 router.post('/assign-tenant-room', ownerProtect, assignTenantToRoom);
+router.post('/remove-tenant', ownerProtect, removeTenantFromRoom);
+
+// Payment Management
+router.get('/tenants-payments', ownerProtect, getTenantsWithPayments);
+router.post('/send-reminder/:tenantId', ownerProtect, sendPaymentReminder);
+router.put('/payment-status/:tenantId', ownerProtect, updatePaymentStatus);
+
+
 
 module.exports = router;

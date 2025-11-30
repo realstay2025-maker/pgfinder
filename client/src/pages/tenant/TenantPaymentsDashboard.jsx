@@ -6,7 +6,8 @@ import {
     CurrencyRupeeIcon, 
     CalendarDaysIcon, 
     ArrowPathIcon,
-    ExclamationTriangleIcon
+    ExclamationTriangleIcon,
+    DocumentArrowDownIcon
 } from '@heroicons/react/24/outline';
 
 const API_TENANT_PAYMENTS = 'http://localhost:5000/api/payments/tenant/my-payments';
@@ -26,6 +27,7 @@ const getStatusBadge = (status) => {
 const TenantPaymentsDashboard = () => {
     const { user } = useAuth();
     const [data, setData] = useState(null);
+    const [invoices, setInvoices] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -34,13 +36,38 @@ const TenantPaymentsDashboard = () => {
         setError(null);
         try {
             const config = { headers: { Authorization: `Bearer ${user.token}` } };
-            const res = await axios.get(API_TENANT_PAYMENTS, config);
-            setData(res.data);
+            const [paymentsRes, invoicesRes] = await Promise.all([
+                axios.get(API_TENANT_PAYMENTS, config),
+                axios.get('http://localhost:5000/api/tenant/invoices', config)
+            ]);
+            setData(paymentsRes.data);
+            setInvoices(invoicesRes.data);
         } catch (err) {
             console.error("Tenant Payments Fetch Error:", err);
             setError(err.response?.data?.error || "Failed to load payment records.");
         } finally {
             setLoading(false);
+        }
+    };
+    
+    const downloadInvoice = async (invoiceId, invoiceNumber) => {
+        try {
+            const config = { 
+                headers: { Authorization: `Bearer ${user.token}` },
+                responseType: 'blob'
+            };
+            const res = await axios.get(`http://localhost:5000/api/tenant/invoice/${invoiceId}/pdf`, config);
+            
+            const blob = new Blob([res.data], { type: 'application/pdf' });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `invoice-${invoiceNumber}.pdf`;
+            link.click();
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error('Download error:', err);
+            alert('Failed to download invoice');
         }
     };
 
@@ -142,13 +169,24 @@ const TenantPaymentsDashboard = () => {
                                         {getStatusBadge(p.status)}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        {p.status !== 'paid' && (
-                                            <button 
-                                                // This button would open a modal to record a payment
-                                                className="text-primary-dark hover:text-blue-700 font-medium"
-                                            >
-                                                Record Payment
-                                            </button>
+                                        {p.status === 'paid' ? (
+                                            (() => {
+                                                const invoice = invoices.find(inv => 
+                                                    inv.month === new Date(p.dueDate).getMonth() + 1 && 
+                                                    inv.year === new Date(p.dueDate).getFullYear()
+                                                );
+                                                return invoice ? (
+                                                    <button 
+                                                        onClick={() => downloadInvoice(invoice._id, invoice.invoiceNumber)}
+                                                        className="inline-flex items-center px-3 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full hover:bg-green-200 transition-colors"
+                                                    >
+                                                        <DocumentArrowDownIcon className="w-4 h-4 mr-1" />
+                                                        Invoice
+                                                    </button>
+                                                ) : null;
+                                            })()
+                                        ) : (
+                                            <span className="text-gray-400 text-xs">Pending</span>
                                         )}
                                     </td>
                                 </tr>

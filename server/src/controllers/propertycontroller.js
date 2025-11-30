@@ -218,36 +218,55 @@ exports.getRoomRoster = async (req, res) => {
             return res.status(200).json([]);
         }
 
-        // Get rooms and tenants from separate collections
+        // Get rooms with populated tenant data
         const roster = await Promise.all(properties.map(async (property) => {
-            const rooms = await Room.find({ propertyId: property._id }).lean();
-            const tenants = await Tenant.find({ propertyId: property._id, status: 'active' }).lean();
+            const rooms = await Room.find({ propertyId: property._id })
+                .populate('tenants.tenantId', 'name email phone')
+                .lean();
             
-            // Add tenants to their respective rooms
-            const roomsWithTenants = rooms.map(room => {
-                const roomTenants = tenants.filter(tenant => tenant.roomId.toString() === room._id.toString());
-                return {
-                    ...room,
-                    tenants: roomTenants,
-                    occupiedBeds: roomTenants.length,
-                    status: roomTenants.length >= room.maxBeds ? 'full' : roomTenants.length > 0 ? 'partial' : 'empty'
-                };
-            });
+            // Group rooms by sharing type and format like RoomManagement
+            const roomsByType = rooms.reduce((acc, room) => {
+                if (!acc[room.roomType]) {
+                    acc[room.roomType] = [];
+                }
+                
+                // Format room data to match RoomManagement structure
+                acc[room.roomType].push({
+                    _id: room._id,
+                    roomNumber: room.roomNumber,
+                    capacity: room.maxBeds,
+                    currentOccupancy: room.occupiedBeds || room.tenants?.length || 0,
+                    sharingType: room.roomType,
+                    basePrice: room.basePrice,
+                    status: room.status,
+                    tenants: room.tenants?.map(tenant => ({
+                        _id: tenant.tenantId ? tenant.tenantId._id : tenant._id,
+                        name: tenant.name,
+                        phone: tenant.phone,
+                        email: tenant.email,
+                        bedId: tenant.bedId,
+                        joinDate: tenant.joinDate,
+                        status: tenant.status
+                    })) || [],
+                    propertyId: room.propertyId
+                });
+                return acc;
+            }, {});
             
-            // Group rooms by room type
-            const roomTypeMap = {};
-            property.roomTypes.forEach(rt => {
-                roomTypeMap[rt.type] = {
-                    ...rt,
-                    rooms: roomsWithTenants.filter(room => room.roomType === rt.type)
-                };
-            });
+            // Convert to roomTypes array format
+            const roomTypes = Object.entries(roomsByType).map(([type, roomsOfType]) => ({
+                type,
+                basePrice: roomsOfType[0]?.basePrice || 0,
+                availableCount: roomsOfType.length,
+                rooms: roomsOfType,
+                tenants: roomsOfType.flatMap(room => room.tenants || [])
+            }));
             
             return {
                 _id: property._id,
                 title: property.title,
                 address: property.address,
-                roomTypes: Object.values(roomTypeMap)
+                roomTypes: roomTypes
             };
         }));
 

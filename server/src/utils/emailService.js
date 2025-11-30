@@ -40,4 +40,37 @@ const sendTenantCredentials = async (email, name, password) => {
     return transporter.sendMail(mailOptions);
 };
 
-module.exports = { sendTenantCredentials };
+const sendPaymentReminder = async (email, name, propertyTitle, amount, dueDate) => {
+    // Check if email is properly configured
+    if (!process.env.EMAIL_USER || process.env.EMAIL_USER === 'your-email@gmail.com') {
+        console.log('Email not configured - skipping payment reminder');
+        return Promise.resolve({ message: 'Email skipped - not configured' });
+    }
+
+    const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: 'Payment Reminder - PG Rent Due',
+        html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #DC2626;">💰 Payment Reminder</h2>
+                <p>Dear ${name},</p>
+                <p>This is a friendly reminder that your rent payment is due for <strong>${propertyTitle}</strong>.</p>
+                <div style="background: #FEF2F2; border-left: 4px solid #DC2626; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #DC2626; margin-top: 0;">Payment Details:</h3>
+                    <p><strong>Property:</strong> ${propertyTitle}</p>
+                    <p><strong>Amount Due:</strong> ₹${amount}</p>
+                    <p><strong>Due Date:</strong> ${new Date(dueDate).toLocaleDateString()}</p>
+                </div>
+                <p>Please make the payment at your earliest convenience to avoid any late fees.</p>
+                <p>If you have already made the payment, please ignore this reminder.</p>
+                <br>
+                <p>Best regards,<br>PG Management Team</p>
+            </div>
+        `
+    };
+
+    return transporter.sendMail(mailOptions);
+};
+
+module.exports = { sendTenantCredentials, sendPaymentReminder };

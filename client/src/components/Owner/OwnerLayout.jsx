@@ -112,7 +112,7 @@ const OwnerLayout = () => { // <<< REMOVED { children } prop
             )}
             
             {/* Desktop Sidebar */}
-            <div className="w-72 bg-gradient-to-b from-slate-900 via-blue-900 to-indigo-900 text-white flex flex-col hidden md:flex flex-shrink-0 relative overflow-hidden">
+            <div className="w-16 lg:w-72 bg-gradient-to-b from-slate-900 via-blue-900 to-indigo-900 text-white flex flex-col hidden md:flex flex-shrink-0 relative overflow-hidden">
                 {/* Background Pattern */}
                 <div className="absolute inset-0 opacity-10">
                     <div className="absolute top-0 left-0 w-40 h-40 bg-white rounded-full -translate-x-20 -translate-y-20"></div>
@@ -135,7 +135,7 @@ const OwnerLayout = () => { // <<< REMOVED { children } prop
                 </div>
                 
                 {/* Navigation */}
-                <nav className="flex-grow px-4 relative z-10">
+                <nav className="flex-grow px-2 lg:px-4 relative z-10 overflow-y-auto">
                     <div className="space-y-1">
                         {navItems.map(item => {
                             const Icon = item.icon;
@@ -160,7 +160,7 @@ const OwnerLayout = () => { // <<< REMOVED { children } prop
                                     }`}>
                                         <Icon className="w-5 h-5" />
                                     </div>
-                                    <span className={`font-medium text-sm relative z-10 ${
+                                    <span className={`font-medium text-sm relative z-10 hidden lg:block ${
                                         active ? 'text-white' : 'text-blue-100 group-hover:text-white'
                                     }`}>
                                         {item.name}

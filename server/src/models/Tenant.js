@@ -4,17 +4,22 @@ const mongoose = require('mongoose');
 const TenantSchema = new mongoose.Schema({
     propertyId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Property',
-        required: true
+        ref: 'Property'
+    },
+    ownerId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
     },
     roomId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Room',
-        required: true
+        ref: 'Room'
     },
     bedId: {
-        type: String,
-        required: true
+        type: String
+    },
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
     },
     name: {
         type: String,
@@ -24,11 +29,20 @@ const TenantSchema = new mongoose.Schema({
         type: String
     },
     email: {
+        type: String,
+        required: true
+    },
+    address: {
+        type: String
+    },
+    emergencyContact: {
+        type: String
+    },
+    occupation: {
         type: String
     },
     rent: {
-        type: Number,
-        required: true
+        type: Number
     },
     joinDate: {
         type: Date,
@@ -37,10 +51,13 @@ const TenantSchema = new mongoose.Schema({
     moveOutDate: {
         type: Date
     },
+    profileCompletedAt: {
+        type: Date
+    },
     status: {
         type: String,
-        enum: ['active', 'notice', 'moved_out'],
-        default: 'active'
+        enum: ['profile_incomplete', 'profile_completed', 'active', 'notice', 'moved_out'],
+        default: 'profile_incomplete'
     },
     // History tracking
     rentHistory: [{
