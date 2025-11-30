@@ -1,7 +1,7 @@
 // server/routes/payment.js
 const express = require('express');
 const { protect, authorizeRoles } = require('../middleware/auth');
-const { getTenantPayments, getOwnerPaymentSummary } = require('../controllers/paymentController');
+const { getTenantPayments, getOwnerPaymentSummary } = require('../controllers/paymentcontroller');
 const router = express.Router();
 
 const ownerProtect = [protect, authorizeRoles('pg_owner')];
