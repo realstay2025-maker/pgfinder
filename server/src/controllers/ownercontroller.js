@@ -42,10 +42,10 @@ exports.getDashboardMetrics = async (req, res) => {
                 $group: {
                     _id: '$propertyId',
                     totalRooms: { $count: {} },
-                    totalCapacity: { $sum: '$capacity' },
-                    totalOccupancy: { $sum: '$currentOccupancy' },
+                    totalCapacity: { $sum: '$maxBeds' },
+                    totalOccupancy: { $sum: '$occupiedBeds' },
                     // Used for calculating occupancy rate per property
-                    roomData: { $push: { roomNumber: '$roomNumber', occupancy: '$currentOccupancy', capacity: '$capacity' } }
+                    roomData: { $push: { roomNumber: '$roomNumber', occupancy: '$occupiedBeds', capacity: '$maxBeds' } }
                 }
             }
         ]);
