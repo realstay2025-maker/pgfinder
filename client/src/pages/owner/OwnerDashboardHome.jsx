@@ -14,7 +14,9 @@ import axios from 'axios';
 
 // API URL for dashboard metrics
 // NOTE: Ensure your backend has a GET route defined at this path: /api/owner/dashboard/metrics
-const API_OWNER_DASHBOARD = 'http://localhost:5000/api/owner/dashboard-metrics';
+import { API_ENDPOINTS } from '../../config/api';
+
+const API_OWNER_DASHBOARD = `${API_ENDPOINTS.OWNER}/dashboard-metrics`;
 
 // --- Reusable Metric Card Component ---
 const MetricCard = ({ title, value, icon: Icon, colorClass, link, isLoading }) => (
@@ -68,8 +70,8 @@ const OwnerDashboardHome = () => {
             
             // Fetch inbox counts
             const [contactRes, bookingRes] = await Promise.all([
-                axios.get('http://localhost:5000/api/owner/contact-requests', config),
-                axios.get('http://localhost:5000/api/owner/booking-requests', config)
+                axios.get(`${API_ENDPOINTS.OWNER}/contact-requests`, config),
+                axios.get(`${API_ENDPOINTS.OWNER}/booking-requests`, config)
             ]);
             
             const pendingContacts = contactRes.data.filter(r => r.status === 'pending').length;

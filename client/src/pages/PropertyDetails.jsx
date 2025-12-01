@@ -4,6 +4,7 @@ import { useParams, Link } from 'react-router-dom';
 import { MapPinIcon, CurrencyRupeeIcon, StarIcon, WifiIcon, HomeIcon, UserGroupIcon, PhoneIcon, ArrowLeftIcon, CheckCircleIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
 import Header from '../components/Header';
 import axios from 'axios';
+import { API_ENDPOINTS } from '../config/api';
 
 const PropertyDetails = () => {
     const { id } = useParams();
@@ -17,7 +18,7 @@ const PropertyDetails = () => {
     useEffect(() => {
         const fetchProperty = async () => {
             try {
-                const res = await axios.get(`http://localhost:5000/api/properties/public/${id}`);
+                const res = await axios.get(`${API_ENDPOINTS.PROPERTIES_PUBLIC}/${id}`);
                 setProperty(res.data);
             } catch (err) {
                 console.error('Failed to fetch property:', err);
@@ -195,7 +196,7 @@ const PropertyDetails = () => {
                         <form onSubmit={async (e) => {
                             e.preventDefault();
                             try {
-                                await axios.post('http://localhost:5000/api/contact', {
+                                await axios.post(API_ENDPOINTS.CONTACT, {
                                     ...contactForm,
                                     propertyId: id,
                                     propertyTitle: property.title
@@ -261,7 +262,7 @@ const PropertyDetails = () => {
                         <form onSubmit={async (e) => {
                             e.preventDefault();
                             try {
-                                await axios.post('http://localhost:5000/api/bookings', {
+                                await axios.post(API_ENDPOINTS.BOOKINGS, {
                                     ...bookingForm,
                                     propertyId: id,
                                     propertyTitle: property.title

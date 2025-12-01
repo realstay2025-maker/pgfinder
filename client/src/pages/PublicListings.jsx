@@ -6,8 +6,9 @@ import { HeartIcon as HeartSolid } from '@heroicons/react/24/solid';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import { API_ENDPOINTS } from '../config/api';
 
-const API_PUBLIC_PROPERTIES = 'http://localhost:5000/api/properties/public';
+const API_PUBLIC_PROPERTIES = API_ENDPOINTS.PROPERTIES_PUBLIC;
 
 // --- Hero Section ---
 const HeroSection = ({ searchParams, handleChange, handleSearch }) => (

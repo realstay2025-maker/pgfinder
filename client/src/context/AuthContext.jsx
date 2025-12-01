@@ -4,7 +4,9 @@ import axios from 'axios';
 
 const AuthContext = createContext();
 
-const API_BASE_URL = 'http://localhost:5000/api/auth'; // Match your backend server URL
+import { API_ENDPOINTS } from '../config/api';
+
+const API_BASE_URL = API_ENDPOINTS.AUTH;
 
 export const AuthProvider = ({ children }) => {
   // Initialize state from local storage for persistence
