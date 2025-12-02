@@ -26,20 +26,85 @@ const TenantSchema = new mongoose.Schema({
         required: true
     },
     phone: {
-        type: String
+        type: String,
+        required: true,
+        validate: {
+            validator: function(v) {
+                return /^[6-9]\d{9}$/.test(v);
+            },
+            message: 'Phone number must be a valid 10-digit Indian mobile number'
+        }
     },
     email: {
         type: String,
         required: true
     },
     address: {
-        type: String
+        type: String,
+        required: true,
+        minlength: [10, 'Address must be at least 10 characters']
+    },
+    permanentAddress: {
+        type: String,
+        required: true,
+        minlength: [10, 'Permanent address must be at least 10 characters']
     },
     emergencyContact: {
-        type: String
+        type: String,
+        required: true,
+        validate: {
+            validator: function(v) {
+                return /^[6-9]\d{9}$/.test(v);
+            },
+            message: 'Emergency contact must be a valid 10-digit mobile number'
+        }
     },
     occupation: {
-        type: String
+        type: String,
+        required: true,
+        minlength: [2, 'Occupation must be at least 2 characters']
+    },
+    occupationType: {
+        type: String,
+        enum: ['working', 'student'],
+        default: 'working'
+    },
+    companyName: {
+        type: String,
+        validate: {
+            validator: function(v) {
+                return this.occupationType !== 'working' || (v && v.trim().length >= 2);
+            },
+            message: 'Company name is required for working professionals'
+        }
+    },
+    collegeName: {
+        type: String,
+        validate: {
+            validator: function(v) {
+                return this.occupationType !== 'student' || (v && v.trim().length >= 2);
+            },
+            message: 'College name is required for students'
+        }
+    },
+    aadhaarNumber: {
+        type: String,
+        required: true,
+        validate: {
+            validator: function(v) {
+                return /^\d{12}$/.test(v);
+            },
+            message: 'Aadhaar number must be exactly 12 digits'
+        },
+        unique: true
+    },
+    documents: {
+        aadhaarCard: {
+            type: String // File path
+        },
+        photo: {
+            type: String // File path
+        }
     },
     rent: {
         type: Number

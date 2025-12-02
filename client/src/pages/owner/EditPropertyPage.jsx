@@ -3,7 +3,7 @@ import { API_ENDPOINTS } from '../../config/api';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate, useParams } from 'react-router-dom';
-import { MinusCircleIcon, PlusCircleIcon, PhotoIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { MinusCircleIcon, PlusCircleIcon, PhotoIcon, TrashIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 
 
 const roomSharingOptions = ['single', 'double', 'triple', 'quad'];
@@ -33,7 +33,7 @@ const EditPropertyPage = () => {
   const fetchPropertyData = async () => {
     try {
       const config = { headers: { Authorization: `Bearer ${user.token}` } };
-      const res = await axios.get(`${API_URL}/${id}`, config);
+      const res = await axios.get(`${API_ENDPOINTS.PROPERTIES}/${id}`, config);
       const property = res.data;
       
       setPropertyData({
@@ -123,7 +123,7 @@ const EditPropertyPage = () => {
         },
       };
 
-      await axios.put(`${API_URL}/${id}`, formData, config);
+      await axios.put(`${API_ENDPOINTS.PROPERTIES}/${id}`, formData, config);
       
       setSuccess('Property updated successfully! Redirecting...');
       setTimeout(() => navigate('/owner/properties'), 1500);
@@ -152,9 +152,17 @@ const EditPropertyPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-6">
-      <h1 className="text-2xl md:text-3xl font-bold text-primary-dark mb-4 md:mb-6 border-b pb-2">
-        Edit Property Details
-      </h1>
+      <div className="flex items-center mb-4 md:mb-6">
+        <button
+          onClick={() => navigate('/owner/properties')}
+          className="mr-4 p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+        >
+          <ArrowLeftIcon className="w-5 h-5" />
+        </button>
+        <h1 className="text-2xl md:text-3xl font-bold text-primary-dark border-b pb-2 flex-1">
+          Edit Property Details
+        </h1>
+      </div>
       <div className="max-w-4xl mx-auto bg-white p-4 md:p-6 lg:p-8 rounded-xl shadow-2xl">
         
         {error && <div className="bg-custom-red/10 border-l-4 border-custom-red text-custom-red p-3 mb-4 rounded text-sm">{error}</div>}

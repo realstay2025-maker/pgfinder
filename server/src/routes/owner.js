@@ -13,7 +13,10 @@ const {
     removeTenantFromRoom,
     getTenantsWithPayments,
     sendPaymentReminder,
-    updatePaymentStatus
+    updatePaymentStatus,
+    getRoster,
+    getKYC,
+    updateKYC
 } = require('../controllers/ownercontroller');
 
 const router = express.Router();
@@ -39,6 +42,21 @@ router.post('/remove-tenant', ownerProtect, removeTenantFromRoom);
 router.get('/tenants-payments', ownerProtect, getTenantsWithPayments);
 router.post('/send-reminder/:tenantId', ownerProtect, sendPaymentReminder);
 router.put('/payment-status/:tenantId', ownerProtect, updatePaymentStatus);
+
+// Roster Management
+router.get('/roster', ownerProtect, getRoster);
+
+// KYC Management
+router.get('/kyc', ownerProtect, getKYC);
+router.post('/kyc', ownerProtect, require('multer')({
+    dest: 'uploads/kyc-documents/',
+    limits: { fileSize: 5 * 1024 * 1024 }
+}).fields([
+    { name: 'panCard', maxCount: 1 },
+    { name: 'aadhaarCard', maxCount: 1 },
+    { name: 'gstCertificate', maxCount: 1 },
+    { name: 'businessProof', maxCount: 1 }
+]), updateKYC);
 
 
 

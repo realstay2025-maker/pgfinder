@@ -166,13 +166,13 @@ exports.getAvailableTenants = async (req, res) => {
         
         // Get tenants who completed profile and selected this owner's properties
         const availableTenants = await Tenant.find({
-            status: 'profile_completed',
-            propertyId: { $in: propertyIds },
+            ownerId: req.user._id,
             $or: [
                 { roomId: { $exists: false } },
-                { roomId: null }
+                { roomId: null },
+                { status: 'profile_completed' }
             ]
-        }).select('name email phone occupation address emergencyContact');
+        }).populate('userId', 'gender').select('name email phone occupation address emergencyContact userId');
         
 
         
@@ -206,6 +206,12 @@ exports.assignTenantToRoom = async (req, res) => {
         // Check if room has space
         if (room.occupiedBeds >= room.maxBeds) {
             return res.status(400).json({ error: 'Room is at full capacity' });
+        }
+        
+        // Check gender compatibility
+        const tenantUser = await User.findById(tenant.userId);
+        if (tenantUser && room.gender && tenantUser.gender !== room.gender) {
+            return res.status(400).json({ error: `This room is designated for ${room.gender} tenants only` });
         }
         
         // Generate bed ID
@@ -255,36 +261,44 @@ exports.removeTenantFromRoom = async (req, res) => {
     try {
         const { tenantId, propertyId, bedId } = req.body;
         
-        // Find and update tenant
-        const tenant = await Tenant.findById(tenantId);
-        if (!tenant) {
-            return res.status(404).json({ error: 'Tenant not found' });
+        // Find tenant in room's tenants array first
+        const room = await Room.findOne({ 
+            $or: [
+                { 'tenants.tenantId': tenantId },
+                { 'tenants._id': tenantId }
+            ]
+        });
+        
+        if (!room) {
+            return res.status(404).json({ error: 'Tenant not found in any room' });
         }
         
-        // Verify owner owns this tenant
-        if (tenant.ownerId.toString() !== req.user._id.toString()) {
+        // Find and update tenant in Tenant collection
+        const tenant = await Tenant.findById(tenantId);
+        if (tenant && tenant.ownerId.toString() !== req.user._id.toString()) {
             return res.status(403).json({ error: 'Unauthorized' });
         }
         
-        // Find room and remove tenant
-        const room = await Room.findById(tenant.roomId);
-        if (room) {
-            // Remove tenant from room's tenants array
-            room.tenants = room.tenants.filter(t => t.bedId !== bedId);
-            
-            // Update room occupancy
-            room.occupiedBeds = Math.max(0, room.occupiedBeds - 1);
-            room.status = room.occupiedBeds === 0 ? 'empty' : 'partial';
-            
-            await room.save();
-        }
+        // Remove tenant from room's tenants array
+        room.tenants = room.tenants.filter(t => 
+            t.tenantId?.toString() !== tenantId.toString() && 
+            t._id?.toString() !== tenantId.toString()
+        );
         
-        // Reset tenant status
-        tenant.propertyId = null;
-        tenant.roomId = null;
-        tenant.bedId = null;
-        tenant.status = 'profile_completed';
-        await tenant.save();
+        // Update room occupancy
+        room.occupiedBeds = Math.max(0, room.occupiedBeds - 1);
+        room.status = room.occupiedBeds === 0 ? 'empty' : 'partial';
+        
+        await room.save();
+        
+        // Reset tenant status if tenant exists in Tenant collection
+        if (tenant) {
+            tenant.propertyId = null;
+            tenant.roomId = null;
+            tenant.bedId = null;
+            tenant.status = 'profile_completed';
+            await tenant.save();
+        }
         
         res.json({ message: 'Tenant removed from room successfully' });
     } catch (err) {
@@ -372,64 +386,62 @@ exports.getTenantsWithPayments = async (req, res) => {
         const startOfMonth = new Date(targetDate.getFullYear(), targetDate.getMonth(), 1);
         const endOfMonth = new Date(targetDate.getFullYear(), targetDate.getMonth() + 1, 0);
         
-        // Get all active tenants for owner (including notice period)
-        const tenants = await Tenant.find({
-            ownerId,
-            status: { $in: ['active', 'notice'] },
-            roomId: { $exists: true, $ne: null }
+        // Get owner's properties
+        const ownerProperties = await Property.find({ ownerId }).select('_id title');
+        const propertyIds = ownerProperties.map(p => p._id);
+        
+        // Get all rooms with tenants
+        const rooms = await Room.find({ 
+            propertyId: { $in: propertyIds },
+            'tenants.0': { $exists: true }
         }).populate('propertyId', 'title');
         
-        // Get rooms to get rent information
-        const roomIds = tenants.map(t => t.roomId).filter(Boolean);
-        const rooms = await Room.find({ _id: { $in: roomIds } });
-        const roomMap = {};
-        rooms.forEach(room => {
-            roomMap[room._id.toString()] = room;
-        });
+        const tenantsWithPayments = [];
         
-        // Get payment for each tenant for the selected month
-        const tenantsWithPayments = await Promise.all(
-            tenants.map(async (tenant) => {
-                // Find payment for the specific month
-                const monthPayment = await Payment.findOne({ 
-                    tenantId: tenant._id,
-                    dueDate: { $gte: startOfMonth, $lte: endOfMonth }
-                }).sort({ createdAt: -1 });
-                
-                const room = roomMap[tenant.roomId?.toString()];
-                const rent = tenant.rent || room?.basePrice || 0;
-                
-                // Calculate due date for the month
-                const dueDate = new Date(targetDate.getFullYear(), targetDate.getMonth(), 5); // 5th of each month
-                
-                // Create payment record if none exists for this month
-                let payment = monthPayment;
-                if (!payment) {
-                    payment = {
-                        tenantId: tenant._id,
-                        propertyId: tenant.propertyId._id,
-                        amountDue: rent,
-                        amountPaid: 0,
-                        dueDate,
-                        status: 'pending',
-                        paidDate: null
-                    };
+        // Process each room's tenants
+        for (const room of rooms) {
+            for (const tenant of room.tenants) {
+                if (tenant.status === 'active' || tenant.status === 'notice') {
+                    // Find payment for the specific month
+                    const monthPayment = await Payment.findOne({ 
+                        tenantId: tenant.tenantId,
+                        dueDate: { $gte: startOfMonth, $lte: endOfMonth }
+                    }).sort({ createdAt: -1 });
+                    
+                    const rent = tenant.rent || room.basePrice || 0;
+                    
+                    // Calculate due date for the month
+                    const dueDate = new Date(targetDate.getFullYear(), targetDate.getMonth(), 5);
+                    
+                    // Create payment record if none exists for this month
+                    let payment = monthPayment;
+                    if (!payment) {
+                        payment = {
+                            tenantId: tenant.tenantId,
+                            propertyId: room.propertyId._id,
+                            amountDue: rent,
+                            amountPaid: 0,
+                            dueDate,
+                            status: 'pending',
+                            paidDate: null
+                        };
+                    }
+                    
+                    tenantsWithPayments.push({
+                        _id: tenant.tenantId,
+                        name: tenant.name,
+                        phone: tenant.phone,
+                        email: tenant.email,
+                        propertyId: room.propertyId._id,
+                        propertyTitle: room.propertyId.title,
+                        roomNumber: room.roomNumber,
+                        rent,
+                        lastPayment: payment,
+                        nextDueDate: dueDate
+                    });
                 }
-                
-                return {
-                    _id: tenant._id,
-                    name: tenant.name,
-                    phone: tenant.phone,
-                    email: tenant.email,
-                    propertyId: tenant.propertyId?._id,
-                    propertyTitle: tenant.propertyId?.title || 'N/A',
-                    roomNumber: room?.roomNumber || 'N/A',
-                    rent,
-                    lastPayment: payment,
-                    nextDueDate: dueDate
-                };
-            })
-        );
+            }
+        }
         
         res.json(tenantsWithPayments);
     } catch (err) {
@@ -567,5 +579,113 @@ exports.updatePaymentStatus = async (req, res) => {
     } catch (err) {
         console.error('Update payment status error:', err);
         res.status(500).json({ error: 'Failed to update payment status', details: err.message });
+    }
+};
+
+// Get/Update KYC details
+exports.getKYC = async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id).select('ownerProfile');
+        res.json(user.ownerProfile || {});
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to fetch KYC details' });
+    }
+};
+
+exports.updateKYC = async (req, res) => {
+    try {
+        const { panNumber, aadhaarNumber, gstNumber, businessAddress } = req.body;
+        
+        const updateData = {
+            'ownerProfile.panNumber': panNumber,
+            'ownerProfile.aadhaarNumber': aadhaarNumber,
+            'ownerProfile.gstNumber': gstNumber,
+            'ownerProfile.businessAddress': businessAddress,
+            'ownerProfile.kycStatus': 'pending',
+            'ownerProfile.kycSubmittedAt': new Date()
+        };
+        
+        // Handle file uploads
+        if (req.files) {
+            if (req.files.panCard) updateData['ownerProfile.kycDocuments.panCard'] = req.files.panCard[0].path;
+            if (req.files.aadhaarCard) updateData['ownerProfile.kycDocuments.aadhaarCard'] = req.files.aadhaarCard[0].path;
+            if (req.files.gstCertificate) updateData['ownerProfile.kycDocuments.gstCertificate'] = req.files.gstCertificate[0].path;
+            if (req.files.businessProof) updateData['ownerProfile.kycDocuments.businessProof'] = req.files.businessProof[0].path;
+        }
+        
+        await User.findByIdAndUpdate(req.user._id, updateData);
+        res.json({ message: 'KYC details updated successfully' });
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to update KYC details' });
+    }
+};
+
+// Get detailed roster with rooms and tenants
+exports.getRoster = async (req, res) => {
+    try {
+        const ownerId = req.user._id;
+        
+        // Get all tenants for this owner with all fields
+        const tenants = await Tenant.find({ ownerId })
+            .populate('propertyId', 'title')
+            .populate('roomId', 'roomNumber roomType')
+            .select('name email phone address permanentAddress occupationType companyName collegeName emergencyContact aadhaarNumber documents propertyId roomId');
+        
+        // Group tenants by property
+        const propertiesMap = {};
+        
+        tenants.forEach(tenant => {
+            if (!tenant.propertyId) return;
+            
+            // Handle tenants without room assignment
+            const roomId = tenant.roomId ? tenant.roomId._id.toString() : 'unassigned';
+            const roomNumber = tenant.roomId ? tenant.roomId.roomNumber : 'Unassigned';
+            const roomType = tenant.roomId ? tenant.roomId.roomType : 'N/A';
+            
+            const propertyId = tenant.propertyId._id.toString();
+            
+            if (!propertiesMap[propertyId]) {
+                propertiesMap[propertyId] = {
+                    _id: tenant.propertyId._id,
+                    title: tenant.propertyId.title,
+                    rooms: {}
+                };
+            }
+            
+            if (!propertiesMap[propertyId].rooms[roomId]) {
+                propertiesMap[propertyId].rooms[roomId] = {
+                    _id: tenant.roomId ? tenant.roomId._id : null,
+                    roomNumber: roomNumber,
+                    roomType: { type: roomType },
+                    tenants: []
+                };
+            }
+            
+            propertiesMap[propertyId].rooms[roomId].tenants.push({
+                _id: tenant._id,
+                name: tenant.name,
+                email: tenant.email,
+                phone: tenant.phone,
+                address: tenant.address,
+                permanentAddress: tenant.permanentAddress,
+                occupationType: tenant.occupationType,
+                companyName: tenant.companyName,
+                collegeName: tenant.collegeName,
+                emergencyContact: tenant.emergencyContact,
+                aadhaarNumber: tenant.aadhaarNumber,
+                documents: tenant.documents
+            });
+        });
+        
+        // Convert to array format
+        const rosterData = Object.values(propertiesMap).map(property => ({
+            ...property,
+            rooms: Object.values(property.rooms)
+        }));
+        
+        res.json(rosterData);
+    } catch (err) {
+        console.error('Get roster error:', err);
+        res.status(500).json({ error: 'Failed to fetch roster data' });
     }
 };

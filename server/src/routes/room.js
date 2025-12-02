@@ -14,7 +14,10 @@ const router = express.Router();
 const ownerProtect = [protect, authorizeRoles('pg_owner')];
 
 // 1. SPECIFIC ROUTE: Fetch available rooms (This uses the literal string 'available')
-router.get('/available', ownerProtect, getAvailableRoomsForOwner); 
+router.get('/available', ownerProtect, getAvailableRoomsForOwner);
+
+// Owner rooms endpoint
+router.get('/owner', ownerProtect, getAvailableRoomsForOwner); 
 
 // 2. SPECIFIC ROUTE: Get rooms for property management page
 router.get('/property/:propertyId', ownerProtect, getRoomsForProperty);

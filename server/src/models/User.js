@@ -25,10 +25,34 @@ const UserSchema = new mongoose.Schema({
         enum: ['super_admin', 'admin', 'pg_owner', 'tenant'],
         required: true
     },
+    gender: {
+        type: String,
+        enum: ['male', 'female'],
+        required: true
+    },
     // Owner-specific fields
     ownerProfile: {
         companyName: { type: String, trim: true },
-        pgCount: { type: Number, default: 0 }
+        pgCount: { type: Number, default: 0 },
+        // KYC Details
+        panNumber: { type: String, trim: true },
+        aadhaarNumber: { type: String, trim: true },
+        gstNumber: { type: String, trim: true },
+        businessAddress: { type: String, trim: true },
+        kycDocuments: {
+            panCard: { type: String },
+            aadhaarCard: { type: String },
+            gstCertificate: { type: String },
+            businessProof: { type: String }
+        },
+        kycStatus: { type: String, enum: ['pending', 'verified', 'rejected'], default: 'pending' },
+        kycSubmittedAt: { type: Date },
+        kycVerifiedAt: { type: Date }
+    },
+    // Tenant-specific fields
+    tenantProfile: {
+        pgName: { type: String, trim: true },
+        isAssigned: { type: Boolean, default: false }
     },
     // Security fields
     passwordChangedAt: { type: Date },

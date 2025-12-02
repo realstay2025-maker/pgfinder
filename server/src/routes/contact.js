@@ -33,7 +33,7 @@ router.post('/general', async (req, res) => {
         const { name, email, subject, message } = req.body;
         
         // Log general contact (in real app, send email to admin)
-        console.log('General contact form:', { name, email, subject, message });
+        // console.log('General contact form:', { name, email, subject, message });
         
         res.status(200).json({ message: 'Message sent successfully' });
     } catch (err) {

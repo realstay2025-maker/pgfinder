@@ -16,6 +16,11 @@ const RoomSchema = new mongoose.Schema({
         enum: ['single', 'double', 'triple', 'quad'],
         required: true
     },
+    gender: {
+        type: String,
+        enum: ['male', 'female'],
+        required: true
+    },
     maxBeds: {
         type: Number,
         required: true

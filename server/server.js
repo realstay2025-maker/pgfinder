@@ -1,10 +1,13 @@
 // server/index.js (Updated)
 require('dotenv').config();
 const express = require('express');
-const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
-const { apiLimiter } = require('./src/middleware/rateLimiter');
+
+const connectDB = require('./src/config/database');
+const logger = require('./src/utils/logger');
+const errorHandler = require('./src/middleware/errorHandler');
+const { securityMiddleware, generalLimiter, authLimiter } = require('./src/middleware/security');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -29,19 +32,8 @@ const { scheduleSubscriptionReminders } = require('./src/utils/emailReminder');
 
 // const adminMetricsRouter = require('./routes/admin'); // Keep previous routes if you still use them
 
-// Security Middleware
-app.use(helmet({
-    crossOriginEmbedderPolicy: false,
-    crossOriginResourcePolicy: { policy: "cross-origin" },
-    contentSecurityPolicy: {
-        directives: {
-            defaultSrc: ["'self'"],
-            styleSrc: ["'self'", "'unsafe-inline'"],
-            scriptSrc: ["'self'"],
-            imgSrc: ["'self'", "data:", "https:", process.env.NODE_ENV === 'production' ? "" : "http://localhost:5000"].filter(Boolean),
-        },
-    },
-}));
+// Security middleware
+app.use(securityMiddleware);
 
 // CORS Configuration
 app.use(cors({
@@ -52,7 +44,8 @@ app.use(cors({
 }));
 
 // Rate limiting
-app.use('/api/', apiLimiter);
+app.use('/api/', generalLimiter);
+app.use('/api/auth/', authLimiter);
 
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
@@ -65,13 +58,22 @@ app.use('/uploads', (req, res, next) => {
     next();
 }, express.static('uploads'));
 
-// 1. CONNECT TO DB (replace with your actual connection logic)
-mongoose.connect(MONGODB_URI)
-  .then(() => console.log('MongoDB Connected'))
-  .catch(err => console.error('DB Connection Error:', err));
+// Serve tenant documents (protected route)
+app.use('/uploads/tenant-documents', (req, res, next) => {
+    // Add authentication check here if needed
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Cross-Origin-Resource-Policy', 'cross-origin');
+    next();
+}, express.static('uploads/tenant-documents'));
 
-// 2. MOUNT ROUTES
-app.use('/api/auth', authRoutes); // NEW AUTH ROUTES
+// Connect to MongoDB
+connectDB();
+
+// Health check routes
+app.use('/api', require('./src/routes/health'));
+
+// API Routes
+app.use('/api/auth', authRoutes);
 app.use('/api/properties', propertyRoutes);
 app.use('/api/rooms', roomRoutes);
 app.use('/api/tenants', tenantRoutes);
@@ -86,26 +88,29 @@ app.use('/api/notices', noticeRoutes);
 
 
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-    console.error('Server Error:', err.stack);
-    res.status(500).json({ 
-        message: process.env.NODE_ENV === 'production' ? 'Something went wrong!' : err.message 
-    });
-});
+// Error handling middleware (must be last)
+app.use(errorHandler);
 
 // 404 handler
 app.use((req, res) => {
     res.status(404).json({ message: 'Route not found' });
 });
 
+// Graceful shutdown
+process.on('SIGTERM', () => {
+    logger.info('SIGTERM received, shutting down gracefully');
+    server.close(() => {
+        logger.info('Process terminated');
+    });
+});
+
 // Start Server
-app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
-    console.log(`🔒 Security features enabled`);
-    console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+const server = app.listen(PORT, () => {
+    logger.info(`🚀 Server running on port ${PORT}`);
+    logger.info(`🔒 Security features enabled`);
+    logger.info(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
     
     // Start subscription reminder scheduler
     scheduleSubscriptionReminders();
-    console.log(`📧 Subscription reminder scheduler started`);
+    logger.info(`📧 Subscription reminder scheduler started`);
 });

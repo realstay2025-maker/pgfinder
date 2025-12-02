@@ -11,7 +11,7 @@ const transporter = nodemailer.createTransport({
 const sendTenantCredentials = async (email, name, password) => {
     // Check if email is properly configured
     if (!process.env.EMAIL_USER || process.env.EMAIL_USER === 'your-email@gmail.com') {
-        console.log('Email not configured - skipping email send');
+        // console.log('Email not configured - skipping email send');
         return Promise.resolve({ message: 'Email skipped - not configured' });
     }
 
@@ -43,7 +43,7 @@ const sendTenantCredentials = async (email, name, password) => {
 const sendPaymentReminder = async (email, name, propertyTitle, amount, dueDate) => {
     // Check if email is properly configured
     if (!process.env.EMAIL_USER || process.env.EMAIL_USER === 'your-email@gmail.com') {
-        console.log('Email not configured - skipping payment reminder');
+        // console.log('Email not configured - skipping payment reminder');
         return Promise.resolve({ message: 'Email skipped - not configured' });
     }
 

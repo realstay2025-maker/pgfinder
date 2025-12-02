@@ -7,7 +7,7 @@ const Property = require('../models/Property');
 // @route   POST /api/rooms
 // @access  Private (PG Owner)
 exports.createRoom = async (req, res) => {
-    const { propertyId, roomNumber, roomType, basePrice, maxBeds } = req.body;
+    const { propertyId, roomNumber, roomType, basePrice, maxBeds, gender } = req.body;
 
     // 1. Validation
     if (!propertyId) {
@@ -34,6 +34,7 @@ exports.createRoom = async (req, res) => {
             roomType,
             basePrice,
             maxBeds,
+            gender,
             occupiedBeds: 0, 
             status: 'empty',
         });

@@ -12,6 +12,7 @@ const RegisterPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('pg_owner');
+  const [gender, setGender] = useState('');
   const [pgName, setPgName] = useState('');
   const [properties, setProperties] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -46,16 +47,16 @@ const RegisterPage = () => {
       // console.log('Fetched properties:', res.data);
       setProperties(res.data);
     } catch (err) {
-      console.error('Failed to fetch properties:', err);
+      // console.error('Failed to fetch properties:', err);
     }
   };
 
   const submitHandler = async (e) => {
     e.preventDefault();
     try {
-      await register(name, email, password, role, pgName);
+      await register(name, email, password, role, pgName, gender);
     } catch (err) {
-      console.error(err);
+      // console.error(err);
     }
   };
 
@@ -119,6 +120,19 @@ const RegisterPage = () => {
               className="block w-full px-3 py-2.5 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-primary-dark focus:border-primary-dark text-sm md:text-base"
               placeholder="Enter a secure password"
             />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+            <select
+              value={gender}
+              onChange={(e) => setGender(e.target.value)}
+              required
+              className="block w-full px-3 py-2.5 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-2 focus:ring-primary-dark focus:border-primary-dark text-sm md:text-base"
+            >
+              <option value="">Select Gender</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Account Type (Role)</label>

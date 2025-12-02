@@ -7,7 +7,7 @@ import { ArrowPathIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline'
 import { API_ENDPOINTS } from '../../config/api';
  // Assuming a generic API to fetch owner's rooms
 
-const OnboardTenantModal = ({ onClose, onSuccess }) => {
+const OnboardTenantModal = ({ onClose, onSuccess, selectedRoomId = null }) => {
     const { user } = useAuth();
     const [formData, setFormData] = useState({
         tenantId: '',
@@ -31,15 +31,27 @@ const OnboardTenantModal = ({ onClose, onSuccess }) => {
             try {
                 const config = { headers: { Authorization: `Bearer ${user.token}` } };
                 const [roomsRes, tenantsRes] = await Promise.all([
-                    axios.get(API_ROOMS_URL, config),
+                    axios.get(`${API_ENDPOINTS.ROOMS}/owner`, config),
                     axios.get(`${API_ENDPOINTS.OWNER}/available-tenants`, config)
                 ]);
                 
                 // console.log('Rooms data:', roomsRes.data);
                 // console.log('Tenants data:', tenantsRes.data);
                 
-                // Filter rooms to only show those with capacity
-                const openRooms = roomsRes.data.filter(r => r.currentOccupancy < r.capacity);
+                // Filter rooms based on selection or capacity and gender compatibility
+                const openRooms = selectedRoomId 
+                    ? roomsRes.data.filter(r => r._id === selectedRoomId)
+                    : roomsRes.data.filter(r => {
+                        const hasCapacity = (r.occupiedBeds || 0) < (r.maxBeds || r.capacity || 1);
+                        // If tenant is selected, check gender compatibility
+                        if (formData.tenantId && tenantsRes.data.length > 0) {
+                            const selectedTenant = tenantsRes.data.find(t => t._id === formData.tenantId);
+                            if (selectedTenant && r.gender && selectedTenant.gender !== r.gender) {
+                                return false;
+                            }
+                        }
+                        return hasCapacity;
+                    });
                 setAvailableRooms(openRooms);
                 
                 // Set available tenants (those without room assignment)
@@ -59,7 +71,7 @@ const OnboardTenantModal = ({ onClose, onSuccess }) => {
                 }
 
             } catch (err) {
-                console.error("Error fetching data:", err);
+                // console.error("Error fetching data:", err);
                 setError("Failed to load data.");
             } finally {
                 setRoomsLoading(false);
@@ -67,7 +79,7 @@ const OnboardTenantModal = ({ onClose, onSuccess }) => {
         };
 
         fetchData();
-    }, [user.token]);
+    }, [user.token, selectedRoomId]);
 
     // Filter tenants based on search
     useEffect(() => {
@@ -102,7 +114,7 @@ const OnboardTenantModal = ({ onClose, onSuccess }) => {
 
         try {
             const config = { headers: { Authorization: `Bearer ${user.token}` } };
-            console.log('Submitting form data:', formData);
+            // console.log('Submitting form data:', formData);
             const res = await axios.post(`${API_ENDPOINTS.OWNER}/assign-tenant-room`, formData, config);
             
             setSuccessMessage(`Tenant successfully assigned to room!`);
@@ -112,7 +124,7 @@ const OnboardTenantModal = ({ onClose, onSuccess }) => {
             }, 2000); 
 
         } catch (err) {
-            console.error(err);
+            // console.error(err);
             setError(err.response?.data?.error || 'Failed to assign tenant to room.');
         } finally {
             setLoading(false);
@@ -130,12 +142,12 @@ const OnboardTenantModal = ({ onClose, onSuccess }) => {
         );
     }
     
-    if ((availableRooms.length === 0 || availableTenants.length === 0) && !error) {
+    if (availableRooms.length === 0 && !error) {
          return (
             <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex justify-center items-center z-50">
                 <div className="bg-white p-6 rounded-xl shadow-2xl w-full max-w-md">
                     <h3 className="text-xl font-bold mb-4 text-custom-red">Cannot Assign Tenant</h3>
-                    <p>{availableRooms.length === 0 ? 'All rooms are at full capacity.' : 'No available tenants to assign.'}</p>
+                    <p>All rooms are at full capacity. Please create more rooms or remove tenants from existing rooms.</p>
                     <div className="flex justify-end mt-4">
                         <button onClick={onClose} className="py-2 px-4 rounded-md text-gray-700 bg-gray-200">Close</button>
                     </div>
@@ -213,20 +225,36 @@ const OnboardTenantModal = ({ onClose, onSuccess }) => {
                     {/* Room Assignment */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Select Room</label>
-                        <select 
-                            name="roomId" 
-                            value={formData.roomId} 
-                            onChange={handleChange} 
-                            className="w-full px-3 py-2 border rounded-md" 
-                            required
-                        >
-                            <option value="">Select Room (Available: {availableRooms.length})</option>
-                            {availableRooms.map(room => (
-                                <option key={room._id} value={room._id}>
-                                    {room.roomNumber} ({room.sharingType} Sharing) - ₹{room.basePrice}/mo
-                                </option>
-                            ))}
-                        </select>
+                        {selectedRoomId ? (
+                            <div className="w-full px-3 py-2 border rounded-md bg-gray-50">
+                                {availableRooms.length > 0 && (
+                                    <div>
+                                        <div className="font-medium">Room {availableRooms[0].roomNumber}</div>
+                                        <div className="text-sm text-gray-600">
+                                            {availableRooms[0].sharingType} Sharing - ₹{availableRooms[0].basePrice}/mo
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <select 
+                                name="roomId" 
+                                value={formData.roomId} 
+                                onChange={handleChange} 
+                                className="w-full px-3 py-2 border rounded-md" 
+                                required
+                            >
+                                <option value="">Select Room (Available: {availableRooms.length})</option>
+                                {availableRooms.map(room => {
+                                    const available = (room.maxBeds || room.capacity || 1) - (room.occupiedBeds || 0);
+                                    return (
+                                        <option key={room._id} value={room._id}>
+                                            Room {room.roomNumber} ({room.sharingType} Sharing) - {available} bed(s) available - ₹{room.basePrice}/mo
+                                        </option>
+                                    );
+                                })}
+                            </select>
+                        )}
                     </div>
 
                     <div>

@@ -15,14 +15,12 @@ import {
     TrashIcon,
     PencilSquareIcon,
     CurrencyRupeeIcon,
-    HomeIcon
+    HomeIcon,
+    DocumentTextIcon
 } from '@heroicons/react/24/outline';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
 import OnboardTenantModal from './OnboardTenantModal';
-
-// API endpoint for the detailed room roster
-
 
 const OwnerTenantRoster = () => {
     const { user } = useAuth();
@@ -37,7 +35,9 @@ const OwnerTenantRoster = () => {
     const [tenantForm, setTenantForm] = useState({ name: '', phone: '', email: '', rent: '' });
     const [showRoomModal, setShowRoomModal] = useState(false);
     const [selectedRoom, setSelectedRoom] = useState(null);
-    const [editingRoom, setEditingRoom] = useState(null); 
+    const [editingRoom, setEditingRoom] = useState(null);
+    const [showTenantProfile, setShowTenantProfile] = useState(false);
+    const [selectedTenantProfile, setSelectedTenantProfile] = useState(null); 
 
     const fetchRoster = async () => {
         if (!user || user.role !== 'pg_owner') {
@@ -49,7 +49,7 @@ const OwnerTenantRoster = () => {
         setError(null);
         try {
             const config = { headers: { Authorization: `Bearer ${user.token}` } };
-            const res = await axios.get(API_ROSTER, config); 
+            const res = await axios.get(`${API_ENDPOINTS.OWNER}/roster`, config); 
             setRosterData(res.data);
             // Reset property filter if no data or if selected property disappears
             if (res.data.length === 0) {
@@ -154,6 +154,18 @@ const OwnerTenantRoster = () => {
         }
     };
 
+    const viewTenantProfile = async (tenantId) => {
+        try {
+            const config = { headers: { Authorization: `Bearer ${user.token}` } };
+            const res = await axios.get(`${API_ENDPOINTS.TENANT}/profile/${tenantId}/owner`, config);
+            // console.log('Tenant profile data:', res.data);
+            setSelectedTenantProfile(res.data);
+            setShowTenantProfile(true);
+        } catch (err) {
+            alert(err.response?.data?.error || 'Failed to fetch tenant profile');
+        }
+    };
+
     const handleDeleteRoom = async () => {
         if (!confirm('Are you sure you want to delete this room? All tenants will be removed.')) return;
         
@@ -191,11 +203,12 @@ const OwnerTenantRoster = () => {
 
         processedData.forEach(property => {
             (property.roomTypes || []).forEach(roomType => {
-                const roomCount = roomType.availableCount || 0;
-                const bedsInType = roomCount * (bedsPerRoom[roomType.type] || 1);
-                totalBeds += bedsInType;
-                occupiedBeds += roomType.occupiedBeds || 0;
-                totalRooms += roomCount;
+                // Calculate from actual room data
+                (roomType.rooms || []).forEach(room => {
+                    totalBeds += room.capacity || 0;
+                    occupiedBeds += room.currentOccupancy || 0;
+                    totalRooms += 1;
+                });
             });
         });
 
@@ -416,9 +429,9 @@ const OwnerTenantRoster = () => {
                                         {property.roomTypes && property.roomTypes.length > 0 ? (
                                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                                 {property.roomTypes.map((roomType, index) => {
-                                                    const bedsPerRoom = { single: 1, double: 2, triple: 3, quad: 4 };
-                                                    const totalBeds = (roomType.availableCount || 0) * (bedsPerRoom[roomType.type] || 1);
-                                                    const occupiedBeds = roomType.tenants?.length || 0;
+                                                    // Calculate from actual room data
+                                                    const totalBeds = (roomType.rooms || []).reduce((sum, room) => sum + (room.capacity || 0), 0);
+                                                    const occupiedBeds = (roomType.rooms || []).reduce((sum, room) => sum + (room.currentOccupancy || 0), 0);
                                                     const availableBeds = totalBeds - occupiedBeds;
                                                     
                                                     return (
@@ -648,6 +661,13 @@ const OwnerTenantRoster = () => {
                                                     </div>
                                                 </div>
                                             <div className="flex items-center space-x-2">
+                                                <button
+                                                    onClick={() => viewTenantProfile(tenant._id)}
+                                                    className="p-2 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-xl transition-colors"
+                                                    title="View Profile"
+                                                >
+                                                    <EyeIcon className="w-4 h-4" />
+                                                </button>
                                                 {tenant.phone && (
                                                     <button
                                                         onClick={() => window.open(`tel:${tenant.phone}`, '_self')}
@@ -714,6 +734,154 @@ const OwnerTenantRoster = () => {
                         fetchRoster();
                     }}
                 />
+            )}
+            
+            {/* Tenant Profile Modal */}
+            {showTenantProfile && selectedTenantProfile && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-2xl p-6 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto shadow-2xl">
+                        <div className="flex items-center justify-between mb-6">
+                            <h3 className="text-2xl font-bold text-gray-800">Tenant Profile</h3>
+                            <button
+                                onClick={() => setShowTenantProfile(false)}
+                                className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-xl"
+                            >
+                                <XCircleIcon className="w-6 h-6" />
+                            </button>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* Basic Info */}
+                            <div className="space-y-4">
+                                <h4 className="font-semibold text-gray-800 border-b pb-2">Basic Information</h4>
+                                <div className="space-y-3">
+                                    <div>
+                                        <label className="text-sm text-gray-600">Name</label>
+                                        <p className="font-medium">{selectedTenantProfile.name}</p>
+                                    </div>
+                                    <div>
+                                        <label className="text-sm text-gray-600">Email</label>
+                                        <p className="font-medium">{selectedTenantProfile.email}</p>
+                                    </div>
+                                    <div>
+                                        <label className="text-sm text-gray-600">Phone</label>
+                                        <p className="font-medium">{selectedTenantProfile.phone}</p>
+                                    </div>
+                                    <div>
+                                        <label className="text-sm text-gray-600">Emergency Contact</label>
+                                        <p className="font-medium">{selectedTenantProfile.emergencyContact}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {/* Address Info */}
+                            <div className="space-y-4">
+                                <h4 className="font-semibold text-gray-800 border-b pb-2">Address Details</h4>
+                                <div className="space-y-3">
+                                    <div>
+                                        <label className="text-sm text-gray-600">Current Address</label>
+                                        <p className="font-medium text-sm">{selectedTenantProfile.address}</p>
+                                    </div>
+                                    <div>
+                                        <label className="text-sm text-gray-600">Permanent Address</label>
+                                        <p className="font-medium text-sm">{selectedTenantProfile.permanentAddress}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {/* Occupation Info */}
+                            <div className="space-y-4">
+                                <h4 className="font-semibold text-gray-800 border-b pb-2">Occupation Details</h4>
+                                <div className="space-y-3">
+                                    <div>
+                                        <label className="text-sm text-gray-600">Type</label>
+                                        <p className="font-medium capitalize">{selectedTenantProfile.occupationType}</p>
+                                    </div>
+                                    {selectedTenantProfile.occupationType === 'working' ? (
+                                        <div>
+                                            <label className="text-sm text-gray-600">Company</label>
+                                            <p className="font-medium">{selectedTenantProfile.companyName}</p>
+                                        </div>
+                                    ) : (
+                                        <div>
+                                            <label className="text-sm text-gray-600">College</label>
+                                            <p className="font-medium">{selectedTenantProfile.collegeName}</p>
+                                        </div>
+                                    )}
+                                    <div>
+                                        <label className="text-sm text-gray-600">Job Title/Course</label>
+                                        <p className="font-medium">{selectedTenantProfile.occupation}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {/* ID & Documents */}
+                            <div className="space-y-4">
+                                <h4 className="font-semibold text-gray-800 border-b pb-2">Identity & Documents</h4>
+                                <div className="space-y-3">
+                                    <div>
+                                        <label className="text-sm text-gray-600">Aadhaar Number</label>
+                                        <p className="font-medium">{selectedTenantProfile.aadhaarNumber}</p>
+                                    </div>
+                                    <div className="space-y-2">
+                                        {selectedTenantProfile.documents?.aadhaarCard && (
+                                            <a
+                                                href={`/uploads/tenant-documents/${selectedTenantProfile.documents.aadhaarCard.split('/').pop()}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="inline-flex items-center px-3 py-2 bg-blue-100 text-blue-800 rounded-lg text-sm hover:bg-blue-200"
+                                            >
+                                                <DocumentTextIcon className="w-4 h-4 mr-2" />
+                                                View Aadhaar Card
+                                            </a>
+                                        )}
+                                        {selectedTenantProfile.documents?.photo && (
+                                            <a
+                                                href={`/uploads/tenant-documents/${selectedTenantProfile.documents.photo.split('/').pop()}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="inline-flex items-center px-3 py-2 bg-green-100 text-green-800 rounded-lg text-sm hover:bg-green-200 ml-2"
+                                            >
+                                                <UserIcon className="w-4 h-4 mr-2" />
+                                                View Photo
+                                            </a>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {/* Room & Rent Info */}
+                            {selectedTenantProfile.roomDetails && (
+                                <div className="md:col-span-2 space-y-4">
+                                    <h4 className="font-semibold text-gray-800 border-b pb-2">Room & Rent Details</h4>
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div>
+                                            <label className="text-sm text-gray-600">Room Number</label>
+                                            <p className="font-medium">{selectedTenantProfile.roomDetails.roomNumber}</p>
+                                        </div>
+                                        <div>
+                                            <label className="text-sm text-gray-600">Bed ID</label>
+                                            <p className="font-medium">{selectedTenantProfile.roomDetails.bedId}</p>
+                                        </div>
+                                        <div>
+                                            <label className="text-sm text-gray-600">Monthly Rent</label>
+                                            <p className="font-medium text-green-600">₹{selectedTenantProfile.rent || 'Not set'}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                        
+                        <div className="mt-6 flex justify-end">
+                            <button
+                                onClick={() => setShowTenantProfile(false)}
+                                className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );

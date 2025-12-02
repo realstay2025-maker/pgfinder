@@ -36,7 +36,8 @@ const RoomManagement = () => {
         roomNumber: '',
         roomType: 'single',
         basePrice: '',
-        maxBeds: 1
+        maxBeds: 1,
+        gender: ''
     });
     const [editingPrice, setEditingPrice] = useState(null);
 
@@ -75,7 +76,7 @@ const RoomManagement = () => {
             await axios.post(`${API_ENDPOINTS.OWNER}/remove-tenant`, {
                 tenantId: tenantId,
                 propertyId: propertyId,
-                bedId: selectedRoom.tenants.find(t => t._id === tenantId)?.bedId
+                bedId: selectedRoom.tenants.find(t => t.tenantId === tenantId || t._id === tenantId)?.bedId
             }, config);
             
             fetchProperty();
@@ -141,12 +142,13 @@ const RoomManagement = () => {
                 roomNumber: newRoom.roomNumber,
                 roomType: newRoom.roomType,
                 basePrice: parseInt(newRoom.basePrice),
-                maxBeds: parseInt(newRoom.maxBeds)
+                maxBeds: parseInt(newRoom.maxBeds),
+                gender: newRoom.gender
             }, config);
             
             fetchProperty();
             setShowCreateRoom(false);
-            setNewRoom({ roomNumber: '', roomType: 'single', basePrice: '', maxBeds: 1 });
+            setNewRoom({ roomNumber: '', roomType: 'single', basePrice: '', maxBeds: 1, gender: '' });
         } catch (err) {
             alert(err.response?.data?.error || 'Failed to create room');
         }
@@ -248,7 +250,7 @@ const RoomManagement = () => {
                                                 <div className="flex items-center space-x-3">
                                                     <div className="w-3 h-8 bg-gradient-to-b from-indigo-500 to-purple-600 rounded-full"></div>
                                                     <h3 className="text-xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent capitalize">
-                                                        {roomType} Sharing
+                                                        {roomType} Sharing ({roomsOfType[0]?.gender || 'Mixed'})
                                                     </h3>
                                                 </div>
                                             </div>
@@ -358,6 +360,7 @@ const RoomManagement = () => {
                             setShowAssignModal(false);
                             fetchProperty();
                         }}
+                        selectedRoomId={selectedRoom?._id}
                     />
                 )}
 
@@ -578,6 +581,20 @@ const RoomManagement = () => {
                                         <option value="double">Double Sharing</option>
                                         <option value="triple">Triple Sharing</option>
                                         <option value="quad">Quad Sharing</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Gender</label>
+                                    <select
+                                        value={newRoom.gender || ''}
+                                        onChange={(e) => setNewRoom({ ...newRoom, gender: e.target.value })}
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                        required
+                                    >
+                                        <option value="">Select Gender</option>
+                                        <option value="male">Male</option>
+                                        <option value="female">Female</option>
                                     </select>
                                 </div>
 

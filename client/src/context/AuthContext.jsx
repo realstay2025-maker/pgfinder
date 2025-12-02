@@ -15,7 +15,7 @@ export const AuthProvider = ({ children }) => {
       const stored = localStorage.getItem('userInfo');
       return stored ? JSON.parse(stored) : null;
     } catch (error) {
-      console.error('Error parsing user from localStorage:', error);
+      // console.error('Error parsing user from localStorage:', error);
       localStorage.removeItem('userInfo');
       return null;
     }
@@ -37,7 +37,7 @@ export const AuthProvider = ({ children }) => {
                     
                 } catch (e) {
                     // Handle potential JSON parsing errors
-                    console.error("Error parsing user from localStorage:", e);
+                    // console.error("Error parsing user from localStorage:", e);
                     localStorage.removeItem('userInfo');
                 }
             }
@@ -49,10 +49,10 @@ export const AuthProvider = ({ children }) => {
     }, []); // Runs only on mount
 
   // Function to register a user
-  const register = async (name, email, password, role, pgName = '') => {
+  const register = async (name, email, password, role, pgName = '', gender = '') => {
     setLoading(true);
     try {
-      const { data } = await axios.post(`${API_BASE_URL}/register`, { name, email, password, role, pgName });
+      const { data } = await axios.post(`${API_BASE_URL}/register`, { name, email, password, role, pgName, gender });
       
       setUser(data);
       localStorage.setItem('userInfo', JSON.stringify(data));
@@ -72,7 +72,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const { data } = await axios.post(`${API_BASE_URL}/login`, { email, password });
       
-      console.log('Login response:', data); // Debug log
+      // console.log('Login response:', data); // Debug log
       
       if (!data.token) {
         throw new Error('No token received from server');
@@ -84,7 +84,7 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
       return data;
     } catch (err) {
-      console.error('Login error:', err);
+      // console.error('Login error:', err);
       setError(err.response?.data?.message || err.message || 'Login failed');
       setLoading(false);
       throw err;

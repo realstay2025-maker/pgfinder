@@ -23,7 +23,7 @@ import AddPropertyPage from './pages/AddPropertyPage';
 import RoomManagement from './pages/owner/RoomManagement';
 import BankSetupPage from './pages/owner/BankSetupPage';
 import OwnerPaymentsDashboard from './pages/owner/OwnerPaymentDashboard';
-import OwnerTenantRoster from './pages/owner/OwnerTenantRoaster';
+import OwnerTenantsList from './pages/owner/OwnerTenantsList';
 import OwnerComplaintsDashboard from './pages/owner/OwnerComplaintsDashboard';
 import EditPropertyPage from './pages/owner/EditPropertyPage';
 import OwnerNotices from './pages/owner/OwnerNotices';
@@ -110,7 +110,7 @@ function App() {
                 <Route path="add-property" element={<AddPropertyPage />} /> {/* /owner/add-property */}
                 <Route path="bank-setup" element={<BankSetupPage />} /> {/* /owner/bank-setup */}
                 <Route path="payments" element={<OwnerPaymentsDashboard />} /> {/* /owner/payments */}
-                <Route path="tenants" element={<OwnerTenantRoster />} /> {/* /owner/tenants */}
+                <Route path="tenants" element={<OwnerTenantsList />} /> {/* /owner/tenants */}
                 <Route path="complaints" element={<OwnerComplaintsDashboard />} /> {/* /owner/complaints */}
                 <Route path="notices" element={<OwnerNotices />} /> {/* /owner/notices */}
                 <Route path="maintenance" element={<OwnerMaintenance />} /> {/* /owner/maintenance */}

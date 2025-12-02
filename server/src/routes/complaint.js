@@ -20,5 +20,6 @@ router.get('/tenant/my-complaints', tenantProtect, getTenantComplaints);
 
 // OWNER ROUTES
 router.get('/owner/all', ownerProtect, getOwnerComplaints);
+router.get('/owner', ownerProtect, getOwnerComplaints);
 router.put('/:id/status', ownerProtect, updateComplaintStatus);
 module.exports = router;

@@ -33,6 +33,10 @@ const OwnerPaymentsDashboard = () => {
                 axios.get(`${API_ENDPOINTS.OWNER}/tenants-payments?month=${selectedMonth}`, config),
                 axios.get(`${API_ENDPOINTS.PROPERTIES}/my`, config)
             ]);
+            // console.log('Tenants data:', tenantsRes.data);
+            // console.log('Properties data:', propertiesRes.data);
+            // console.log('API URL:', `${API_ENDPOINTS.OWNER}/tenants-payments?month=${selectedMonth}`);
+            // console.log('Response status:', tenantsRes.status);
             setTenants(tenantsRes.data);
             setProperties(propertiesRes.data);
         } catch (err) {

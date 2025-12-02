@@ -54,7 +54,7 @@ const OwnerComplaintsDashboard = () => {
         setError(null);
         try {
             const config = { headers: { Authorization: `Bearer ${user.token}` } };
-            const res = await axios.get(API_COMPLAINTS_ALL, config);
+            const res = await axios.get(`${API_ENDPOINTS.COMPLAINTS}/owner`, config);
             setAllComplaints(res.data);
         } catch (err) {
             console.error("Fetch Complaints Error:", err.response?.data?.error || err.message);

@@ -15,11 +15,15 @@ const generateToken = (id) => {
 // @route   POST /api/auth/register
 exports.registerUser = async (req, res) => {
     try {
-        const { name, email, password, role, pgName } = req.body;
+        const { name, email, password, role, pgName, gender } = req.body;
 
         // Input validation
-        if (!name || !email || !password) {
-            return res.status(400).json({ message: 'Name, email, and password are required' });
+        if (!name || !email || !password || !gender) {
+            return res.status(400).json({ message: 'Name, email, password, and gender are required' });
+        }
+        
+        if (!['male', 'female'].includes(gender)) {
+            return res.status(400).json({ message: 'Gender must be either male or female' });
         }
 
         if (!validateEmail(email)) {
@@ -42,6 +46,7 @@ exports.registerUser = async (req, res) => {
         
         // Set default profiles based on role
         const ownerProfile = role === 'pg_owner' ? { companyName: `${sanitizedName}'s PGs` } : undefined;
+        const tenantProfile = role === 'tenant' && pgName ? { pgName, isAssigned: false } : undefined;
         
         // Default role is 'pg_owner' if not specified or invalid
         const userRole = ['super_admin', 'admin', 'pg_owner', 'tenant'].includes(role) ? role : 'pg_owner';
@@ -51,7 +56,9 @@ exports.registerUser = async (req, res) => {
             email: sanitizedEmail,
             password,
             role: userRole,
-            ownerProfile
+            gender,
+            ownerProfile,
+            tenantProfile
         });
         
         // If tenant registration, create initial Tenant record with PG selection
