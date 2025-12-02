@@ -69,6 +69,11 @@ app.use('/uploads/tenant-documents', (req, res, next) => {
 // Connect to MongoDB
 connectDB();
 
+// Root health check
+app.get('/', (req, res) => {
+    res.json({ message: 'PG Management API is running', status: 'OK' });
+});
+
 // Health check routes
 app.use('/api', require('./src/routes/health'));
 
@@ -105,7 +110,7 @@ process.on('SIGTERM', () => {
 });
 
 // Start Server
-const server = app.listen(PORT, () => {
+const server = app.listen(PORT, '0.0.0.0', () => {
     logger.info(`🚀 Server running on port ${PORT}`);
     logger.info(`🔒 Security features enabled`);
     logger.info(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
