@@ -27,27 +27,37 @@ const createIndexes = async () => {
         const Tenant = require('../models/Tenant');
         const Payment = require('../models/Payment');
 
+        const createIndexSafely = async (collection, indexSpec, options = {}) => {
+            try {
+                await collection.createIndex(indexSpec, options);
+            } catch (error) {
+                if (error.code !== 86) { // Ignore index already exists error
+                    throw error;
+                }
+            }
+        };
+
         // User indexes
-        await User.collection.createIndex({ email: 1 }, { unique: true });
-        await User.collection.createIndex({ role: 1 });
+        await createIndexSafely(User.collection, { email: 1 }, { unique: true });
+        await createIndexSafely(User.collection, { role: 1 });
 
         // Property indexes
-        await Property.collection.createIndex({ ownerId: 1 });
-        await Property.collection.createIndex({ 'address.city': 1 });
-        await Property.collection.createIndex({ isApproved: 1 });
+        await createIndexSafely(Property.collection, { ownerId: 1 });
+        await createIndexSafely(Property.collection, { 'address.city': 1 });
+        await createIndexSafely(Property.collection, { isApproved: 1 });
 
         // Room indexes
-        await Room.collection.createIndex({ propertyId: 1, roomNumber: 1 }, { unique: true });
-        await Room.collection.createIndex({ propertyId: 1, gender: 1 });
+        await createIndexSafely(Room.collection, { propertyId: 1, roomNumber: 1 }, { unique: true });
+        await createIndexSafely(Room.collection, { propertyId: 1, gender: 1 });
 
         // Tenant indexes
-        await Tenant.collection.createIndex({ ownerId: 1 });
-        await Tenant.collection.createIndex({ propertyId: 1 });
-        await Tenant.collection.createIndex({ email: 1 });
+        await createIndexSafely(Tenant.collection, { ownerId: 1 });
+        await createIndexSafely(Tenant.collection, { propertyId: 1 });
+        await createIndexSafely(Tenant.collection, { email: 1 });
 
         // Payment indexes
-        await Payment.collection.createIndex({ tenantId: 1, dueDate: 1 });
-        await Payment.collection.createIndex({ propertyId: 1, status: 1 });
+        await createIndexSafely(Payment.collection, { tenantId: 1, dueDate: 1 });
+        await createIndexSafely(Payment.collection, { propertyId: 1, status: 1 });
 
         logger.info('Database indexes created successfully');
     } catch (error) {

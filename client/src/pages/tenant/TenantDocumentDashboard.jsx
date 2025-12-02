@@ -19,23 +19,23 @@ const TenantDocumentsDashboard = () => {
         try {
             const config = { headers: { Authorization: `Bearer ${user.token}` } };
             
-            // Fetch lease info
-            const leaseRes = await axios.get(`${API_ENDPOINTS.TENANT}/my-lease-info`, config);
+            // Fetch tenant profile to get current data
+            const profileRes = await axios.get(`${API_ENDPOINTS.TENANT}/profile`, config);
+            const profile = profileRes.data;
+            
             setLeaseInfo({
-                propertyName: leaseRes.data.propertyName,
-                roomNumber: leaseRes.data.roomNumber,
-                monthlyRent: leaseRes.data.rent || 0,
-                securityDeposit: leaseRes.data.rent ? leaseRes.data.rent * 2 : 0
+                propertyName: profile.pgName || 'Not Assigned',
+                roomNumber: profile.roomNumber || 'Not Assigned',
+                monthlyRent: profile.monthlyRent || 0,
+                securityDeposit: profile.securityDeposit || 0
             });
             
-            // For now, documents will be empty until document upload is implemented
             setDocuments([]);
         } catch (err) {
             console.error('Failed to fetch documents:', err);
-            // Fallback to basic info
             setLeaseInfo({
-                propertyName: user?.tenantProfile?.pgName || 'Not Assigned',
-                roomNumber: 'Pending Assignment',
+                propertyName: 'Not Available',
+                roomNumber: 'Not Available',
                 monthlyRent: 0,
                 securityDeposit: 0
             });

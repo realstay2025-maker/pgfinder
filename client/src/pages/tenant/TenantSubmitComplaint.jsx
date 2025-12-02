@@ -30,7 +30,7 @@ const TenantSubmitComplaint = () => {
         setFetchLoading(true);
         try {
             const config = { headers: { Authorization: `Bearer ${user.token}` } };
-            const res = await axios.get(`${API_ENDPOINTS.TENANT}/my-lease-info`, config); 
+            const res = await axios.get(`${API_ENDPOINTS.TENANT}/profile`, config); 
             const info = res.data;
             
             setLeaseInfo(info);

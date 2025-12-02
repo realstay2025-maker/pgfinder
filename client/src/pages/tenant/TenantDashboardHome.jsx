@@ -31,13 +31,13 @@ const TenantDashboardHome = () => {
             const config = { headers: { Authorization: `Bearer ${user.token}` } };
             
             // Fetch real payment data
-            const paymentRes = await axios.get(`${API_BASE_URL}/payments/tenant/my-payments`, config);
+            const paymentRes = await axios.get(`${API_ENDPOINTS.PAYMENTS}/tenant/my-payments`, config);
             
-            // Fetch real lease info
-            const leaseRes = await axios.get(`${API_BASE_URL}/tenant/my-lease-info`, config);
+            // Fetch tenant profile
+            const leaseRes = await axios.get(`${API_ENDPOINTS.TENANT}/profile`, config);
             
             // Fetch complaints count
-            const complaintsRes = await axios.get(`${API_BASE_URL}/complaints/tenant/my-complaints`, config);
+            const complaintsRes = await axios.get(`${API_ENDPOINTS.COMPLAINTS}/tenant/my-complaints`, config);
             
             setData({ 
                 payments: paymentRes.data, 

@@ -39,7 +39,7 @@ const TenantPaymentsDashboard = () => {
         try {
             const config = { headers: { Authorization: `Bearer ${user.token}` } };
             const [paymentsRes, invoicesRes] = await Promise.all([
-                axios.get(API_TENANT_PAYMENTS, config),
+                axios.get(`${API_ENDPOINTS.PAYMENTS}/tenant/my-payments`, config),
                 axios.get(`${API_ENDPOINTS.TENANT}/invoices`, config)
             ]);
             setData(paymentsRes.data);
