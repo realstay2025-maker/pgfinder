@@ -4,7 +4,7 @@ const Tenant = require('../models/Tenant');
 const Property = require('../models/Property');
 const Room = require('../models/Room');
 const User = require('../models/User');
-const puppeteer = require('puppeteer');
+// const puppeteer = require('puppeteer'); // Removed for deployment
 const path = require('path');
 const fs = require('fs');
 
@@ -97,7 +97,8 @@ const generateInvoicePDF = async (req, res) => {
         </html>`;
         
         // Generate PDF using Puppeteer
-        const browser = await puppeteer.launch({ headless: true });
+        // const browser = await puppeteer.launch({ headless: true }); // Removed for deployment
+        throw new Error('PDF generation temporarily disabled for deployment');
         const page = await browser.newPage();
         await page.setContent(invoiceHTML);
         const pdfBuffer = await page.pdf({ 
