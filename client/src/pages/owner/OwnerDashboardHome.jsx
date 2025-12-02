@@ -11,6 +11,7 @@ import {
     PlusCircleIcon
 } from '@heroicons/react/24/outline';
 import axios from 'axios';
+import usePageTitle from '../../hooks/usePageTitle';
 
 // API URL for dashboard metrics
 // NOTE: Ensure your backend has a GET route defined at this path: /api/owner/dashboard/metrics
@@ -46,6 +47,7 @@ const MetricCard = ({ title, value, icon: Icon, colorClass, link, isLoading }) =
 
 
 const OwnerDashboardHome = () => {
+    usePageTitle('Owner Dashboard');
     const { user } = useAuth();
     const [metrics, setMetrics] = useState({});
     const [loading, setLoading] = useState(true);

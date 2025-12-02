@@ -16,9 +16,11 @@ import {
 } from '@heroicons/react/24/outline';
 import { Link } from 'react-router-dom';
 import { API_ENDPOINTS } from '../../config/api';
-import SubscriptionModal from '../../components/SubscriptionModal'; 
+import SubscriptionModal from '../../components/SubscriptionModal';
+import usePageTitle from '../../hooks/usePageTitle'; 
 
 const OwnerProperties = () => {
+    usePageTitle('My Properties');
     const { user } = useAuth();
     const [properties, setProperties] = useState([]);
     const [loading, setLoading] = useState(true);

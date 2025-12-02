@@ -6,8 +6,10 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import axios from 'axios';
 import { API_ENDPOINTS } from '../config/api';
+import usePageTitle from '../hooks/usePageTitle';
 
 const RegisterPage = () => {
+  usePageTitle('Register');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

@@ -5,8 +5,10 @@ import { ChartBarIcon, UsersIcon, BuildingStorefrontIcon, ClockIcon, CheckCircle
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
 import { API_ENDPOINTS } from '../../config/api';
+import usePageTitle from '../../hooks/usePageTitle';
 
 const AdminDashboardHome = () => {
+    usePageTitle('Admin Dashboard');
     const { user } = useAuth();
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);

@@ -4,8 +4,10 @@ import { Link } from 'react-router-dom';
 import { PhoneIcon, EnvelopeIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import Header from '../components/Header';
 import axios from 'axios';
+import usePageTitle from '../hooks/usePageTitle';
 
 const ContactUs = () => {
+    usePageTitle('Contact Us');
     const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
     const [loading, setLoading] = useState(false);
 

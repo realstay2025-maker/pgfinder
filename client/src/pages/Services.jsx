@@ -2,8 +2,10 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { MagnifyingGlassIcon, ShieldCheckIcon, UserGroupIcon, CurrencyRupeeIcon, ClockIcon } from '@heroicons/react/24/outline';
 import Header from '../components/Header';
+import usePageTitle from '../hooks/usePageTitle';
 
 const Services = () => {
+    usePageTitle('Services');
     const services = [
         {
             icon: MagnifyingGlassIcon,

@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { API_ENDPOINTS } from '../config/api';
+import usePageTitle from '../hooks/usePageTitle';
 
 const API_PUBLIC_PROPERTIES = API_ENDPOINTS.PROPERTIES_PUBLIC;
 
@@ -181,6 +182,7 @@ const PropertyCard = ({ property }) => {
 
 // --- Main Listings Component ---
 const PublicListings = () => {
+    usePageTitle('Find Your Perfect PG');
     const [properties, setProperties] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchParams, setSearchParams] = useState({ city: '', minPrice: '', maxPrice: '' });

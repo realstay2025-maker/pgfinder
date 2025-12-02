@@ -3,8 +3,10 @@ import { UserIcon, DocumentCheckIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../../context/AuthContext';
 import ChangePassword from '../../components/ChangePassword';
 import OwnerKYCForm from './OwnerKYCForm';
+import usePageTitle from '../../hooks/usePageTitle';
 
 const OwnerProfile = () => {
+    usePageTitle('My Profile');
     const { user } = useAuth();
 
     return (

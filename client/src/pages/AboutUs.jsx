@@ -3,8 +3,10 @@ import { Link } from 'react-router-dom';
 import { UserGroupIcon, ShieldCheckIcon, StarIcon } from '@heroicons/react/24/outline';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import usePageTitle from '../hooks/usePageTitle';
 
 const AboutUs = () => {
+    usePageTitle('About Us');
     return (
         <div className="min-h-screen bg-gray-50">
             <Header />

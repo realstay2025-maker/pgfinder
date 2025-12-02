@@ -11,6 +11,7 @@ import {
     UserIcon
 } from '@heroicons/react/24/outline';
 import { Link } from 'react-router-dom';
+import usePageTitle from '../../hooks/usePageTitle';
 
 
 import { API_ENDPOINTS } from '../../config/api';
@@ -18,6 +19,7 @@ const formatCurrency = (amount) => `₹${new Intl.NumberFormat('en-IN').format(a
 const formatDate = (dateString) => new Date(dateString).toLocaleDateString();
 
 const TenantDashboardHome = () => {
+    usePageTitle('Tenant Dashboard');
     const { user } = useAuth();
     const [data, setData] = useState({ payments: null, lease: null, complaints: null });
     const [loading, setLoading] = useState(true);

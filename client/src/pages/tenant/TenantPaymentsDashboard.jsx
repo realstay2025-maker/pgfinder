@@ -9,6 +9,7 @@ import {
     ExclamationTriangleIcon,
     DocumentArrowDownIcon
 } from '@heroicons/react/24/outline';
+import usePageTitle from '../../hooks/usePageTitle';
 
 import { API_ENDPOINTS } from '../../config/api';
 
@@ -25,6 +26,7 @@ const getStatusBadge = (status) => {
 };
 
 const TenantPaymentsDashboard = () => {
+    usePageTitle('My Payments');
     const { user } = useAuth();
     const [data, setData] = useState(null);
     const [invoices, setInvoices] = useState([]);

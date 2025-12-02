@@ -4,8 +4,10 @@ import { UsersIcon, TrashIcon, EyeIcon, MagnifyingGlassIcon, FunnelIcon, XMarkIc
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
 import { API_ENDPOINTS } from '../../config/api';
+import usePageTitle from '../../hooks/usePageTitle';
 
 const AdminUserManagement = () => {
+    usePageTitle('User Management');
     const { user } = useAuth();
     const [users, setUsers] = useState([]);
     const [filteredUsers, setFilteredUsers] = useState([]);

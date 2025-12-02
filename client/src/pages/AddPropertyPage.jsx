@@ -5,9 +5,11 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { MinusCircleIcon, PlusCircleIcon, PhotoIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { API_ENDPOINTS } from '../config/api';
+import usePageTitle from '../hooks/usePageTitle';
 const roomSharingOptions = ['single', 'double', 'triple', 'quad'];
 
 const AddPropertyPage = () => {
+  usePageTitle('Add Property');
   const { user } = useAuth();
   const navigate = useNavigate();
   const [propertyData, setPropertyData] = useState({ // Renamed from formData to propertyData for clarity

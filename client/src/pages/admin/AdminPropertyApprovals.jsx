@@ -4,8 +4,10 @@ import { API_ENDPOINTS } from '../../config/api';
 import { BuildingStorefrontIcon, CheckCircleIcon, XCircleIcon, EyeIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
+import usePageTitle from '../../hooks/usePageTitle';
 
 const AdminPropertyApprovals = () => {
+    usePageTitle('Property Approvals');
     const { user } = useAuth();
     const [properties, setProperties] = useState([]);
     const [loading, setLoading] = useState(true);

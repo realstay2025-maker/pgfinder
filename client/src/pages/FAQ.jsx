@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline';
 import Header from '../components/Header';
+import usePageTitle from '../hooks/usePageTitle';
 
 const FAQ = () => {
+    usePageTitle('FAQ');
     const [openFAQ, setOpenFAQ] = useState(null);
 
     const faqs = [
