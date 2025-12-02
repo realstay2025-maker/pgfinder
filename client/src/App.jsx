@@ -40,6 +40,7 @@ import TenantProfile from './pages/tenant/TenantProfile';
 import TenantSubmitComplaint from './pages/tenant/TenantSubmitComplaint';
 import TenantPaymentsDashboard from './pages/tenant/TenantPaymentsDashboard';
 import TenantDocumentsDashboard from './pages/tenant/TenantDocumentDashboard';
+import TenantGiveNotice from './pages/tenant/TenantGiveNotice';
 
 // --- ADMIN IMPORTS ---
 import AdminLayout from './components/Admin/AdminLayout'; // The simple layout wrapper
@@ -48,6 +49,7 @@ import AdminDashboardHome from './pages/admin/AdminDashboardHome';
 import AdminPropertyApprovals from './pages/admin/AdminPropertyApprovals';
 import AdminUserManagement from './pages/admin/AdminUserManagement';
 import AdminSettings from './pages/admin/AdminSettings';
+import AdminSubscriptions from './pages/admin/AdminSubscriptions';
 
 function App() {
   return (
@@ -75,6 +77,7 @@ function App() {
               <Route index element={<AdminDashboardHome />} /> {/* /admin */}
               <Route path="properties" element={<AdminPropertyApprovals />} /> {/* /admin/properties */}
               <Route path="users" element={<AdminUserManagement />} /> {/* /admin/users */}
+              <Route path="subscriptions" element={<AdminSubscriptions />} /> {/* /admin/subscriptions */}
               <Route path="settings" element={<AdminSettings />} /> {/* /admin/settings */}
             </Route>
           </Route>
@@ -91,6 +94,7 @@ function App() {
               <Route path="payments" element={<TenantPaymentsDashboard />} />
               <Route path="submit-complaint" element={<TenantSubmitComplaint />} /> 
               <Route path="documents" element={<TenantDocumentsDashboard />} />
+              <Route path="give-notice" element={<TenantGiveNotice />} />
             </Route>
           </Route>
 

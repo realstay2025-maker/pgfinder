@@ -34,4 +34,34 @@ const adminProtect = [protect, authorizeRoles('super_admin', 'admin')];
 router.get('/', adminProtect, getAllProperties);
 router.put('/:id/status', adminProtect, updatePropertyStatus);
 
+
+// Subscription routes
+router.post('/subscribe', ownerProtect, async (req, res) => {
+    try {
+        const Subscription = require('../models/Subscription');
+        const { plan, amount } = req.body;
+        
+        const planDurations = {
+            free: 30,
+            monthly: 30,
+            sixMonths: 180,
+            yearly: 365
+        };
+        
+        const endDate = new Date();
+        endDate.setDate(endDate.getDate() + planDurations[plan]);
+        
+        const subscription = await Subscription.create({
+            ownerId: req.user._id,
+            plan,
+            amount,
+            endDate
+        });
+        
+        res.status(201).json({ message: 'Subscription request submitted', subscription });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to create subscription', error: error.message });
+    }
+});
+
 module.exports = router;

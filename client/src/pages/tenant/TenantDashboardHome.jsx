@@ -13,7 +13,7 @@ import {
 import { Link } from 'react-router-dom';
 
 
-const API_BASE_URL = 'http://localhost:5000/api';
+import { API_ENDPOINTS } from '../../config/api';
 const formatCurrency = (amount) => `₹${new Intl.NumberFormat('en-IN').format(amount)}`;
 const formatDate = (dateString) => new Date(dateString).toLocaleDateString();
 

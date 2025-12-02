@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { KeyIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
+import { API_ENDPOINTS } from '../config/api';
 
 const ChangePassword = () => {
     const { user } = useAuth();
@@ -60,7 +61,7 @@ const ChangePassword = () => {
         setLoading(true);
         try {
             const config = { headers: { Authorization: `Bearer ${user.token}` } };
-            await axios.put(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/auth/change-password`, {
+            await axios.put(`${API_ENDPOINTS.AUTH}/change-password`, {
                 currentPassword: formData.currentPassword,
                 newPassword: formData.newPassword
             }, config);

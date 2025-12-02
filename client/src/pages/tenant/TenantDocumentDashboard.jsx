@@ -1,5 +1,7 @@
 // client/src/pages/tenant/TenantDocumentDashboard.jsx
 import React, { useState, useEffect } from 'react';
+import { API_ENDPOINTS } from '../../config/api';
+import axios from 'axios';
 import { DocumentTextIcon, ArrowDownTrayIcon, EyeIcon, CalendarIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../../context/AuthContext';
 
@@ -18,7 +20,7 @@ const TenantDocumentsDashboard = () => {
             const config = { headers: { Authorization: `Bearer ${user.token}` } };
             
             // Fetch lease info
-            const leaseRes = await axios.get('http://localhost:5000/api/tenant/my-lease-info', config);
+            const leaseRes = await axios.get(`${API_ENDPOINTS.TENANT}/my-lease-info`, config);
             setLeaseInfo({
                 propertyName: leaseRes.data.propertyName,
                 roomNumber: leaseRes.data.roomNumber,

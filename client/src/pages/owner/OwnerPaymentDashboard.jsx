@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { CurrencyRupeeIcon, CalendarIcon, ArrowTrendingUpIcon, ExclamationTriangleIcon, BellIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
+import { API_ENDPOINTS } from '../../config/api';
 
 const OwnerPaymentsDashboard = () => {
     const { user } = useAuth();
@@ -29,8 +30,8 @@ const OwnerPaymentsDashboard = () => {
         try {
             const config = { headers: { Authorization: `Bearer ${user.token}` } };
             const [tenantsRes, propertiesRes] = await Promise.all([
-                axios.get(`http://localhost:5000/api/owner/tenants-payments?month=${selectedMonth}`, config),
-                axios.get('http://localhost:5000/api/properties/my', config)
+                axios.get(`${API_ENDPOINTS.OWNER}/tenants-payments?month=${selectedMonth}`, config),
+                axios.get(`${API_ENDPOINTS.PROPERTIES}/my`, config)
             ]);
             setTenants(tenantsRes.data);
             setProperties(propertiesRes.data);
@@ -45,7 +46,7 @@ const OwnerPaymentsDashboard = () => {
         setSendingReminder(tenantId);
         try {
             const config = { headers: { Authorization: `Bearer ${user.token}` } };
-            await axios.post(`http://localhost:5000/api/owner/send-reminder/${tenantId}`, {}, config);
+            await axios.post(`${API_ENDPOINTS.OWNER}/send-reminder/${tenantId}`, {}, config);
             alert('Reminder sent successfully!');
         } catch (err) {
             console.error('Failed to send reminder:', err);
@@ -59,7 +60,7 @@ const OwnerPaymentsDashboard = () => {
         setUpdatingStatus(tenantId);
         try {
             const config = { headers: { Authorization: `Bearer ${user.token}` } };
-            await axios.put(`http://localhost:5000/api/owner/payment-status/${tenantId}`, { status }, config);
+            await axios.put(`${API_ENDPOINTS.OWNER}/payment-status/${tenantId}`, { status }, config);
             fetchData(); // Refresh data
             alert('Payment status updated successfully!');
         } catch (err) {

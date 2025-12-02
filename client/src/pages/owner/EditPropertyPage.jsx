@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { API_ENDPOINTS } from '../../config/api';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate, useParams } from 'react-router-dom';
 import { MinusCircleIcon, PlusCircleIcon, PhotoIcon, TrashIcon } from '@heroicons/react/24/outline';
 
-const API_URL = 'http://localhost:5000/api/properties';
+
 const roomSharingOptions = ['single', 'double', 'triple', 'quad'];
 
 const EditPropertyPage = () => {

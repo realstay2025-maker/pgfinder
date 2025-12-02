@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { CreditCardIcon, CalendarDaysIcon, HomeIcon } from '@heroicons/react/24/outline';
+import { API_ENDPOINTS } from '../config/api';
 
 // Replace with your actual key and script initialization logic
 // In a production app, the key would come from the backend for security
@@ -47,7 +48,7 @@ const TenantDashboard = () => {
         let order;
         try {
             const config = { headers: { Authorization: `Bearer ${user.token}` } };
-            const res = await axios.post('http://localhost:5000/api/payments/initiate', paymentData, config);
+            const res = await axios.post(`${API_ENDPOINTS.PAYMENTS}/initiate`, paymentData, config);
             order = res.data;
         } catch (err) {
             alert('Failed to initiate payment order.');

@@ -1,5 +1,6 @@
 // client/src/pages/admin/AdminPropertyApprovals.jsx
 import React, { useState, useEffect } from 'react';
+import { API_ENDPOINTS } from '../../config/api';
 import { BuildingStorefrontIcon, CheckCircleIcon, XCircleIcon, EyeIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
@@ -18,7 +19,7 @@ const AdminPropertyApprovals = () => {
     const fetchPendingProperties = async () => {
         try {
             const config = { headers: { Authorization: `Bearer ${user.token}` } };
-            const res = await axios.get('http://localhost:5000/api/properties', config);
+            const res = await axios.get(`${API_ENDPOINTS.PROPERTIES}`, config);
             setProperties(res.data.filter(p => p.status === 'pending'));
         } catch (err) {
             console.error('Failed to fetch properties:', err);
@@ -30,7 +31,7 @@ const AdminPropertyApprovals = () => {
     const handleApproval = async (propertyId, status) => {
         try {
             const config = { headers: { Authorization: `Bearer ${user.token}` } };
-            await axios.put(`http://localhost:5000/api/properties/${propertyId}/status`, { status }, config);
+            await axios.put(`${API_ENDPOINTS.PROPERTIES}/${propertyId}/status`, { status }, config);
             setProperties(properties.filter(p => p._id !== propertyId));
             setShowModal(false);
         } catch (err) {

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { API_ENDPOINTS } from '../../config/api';
 import { 
     ExclamationCircleIcon, 
     WrenchScrewdriverIcon,
@@ -12,7 +13,7 @@ import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
 
 // API endpoint to fetch all complaints for the owner
-const API_COMPLAINTS_ALL = 'http://localhost:5000/api/complaints/owner/all';
+
 
 const STATUSES = {
     pending: { color: 'text-red-600 bg-red-100', name: 'Pending' },
@@ -256,7 +257,7 @@ const OwnerComplaintsDashboard = () => {
                                             onClick={async () => {
                                                 try {
                                                     const config = { headers: { Authorization: `Bearer ${user.token}` } };
-                                                    await axios.put(`http://localhost:5000/api/complaints/${selectedComplaint._id}/status`, { status }, config);
+                                                    await axios.put(`${API_ENDPOINTS.COMPLAINTS}/${selectedComplaint._id}/status`, { status }, config);
                                                     setAllComplaints(prev => prev.map(c => c._id === selectedComplaint._id ? {...c, status} : c));
                                                     setShowModal(false);
                                                 } catch (err) {

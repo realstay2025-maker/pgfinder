@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { ChartBarIcon, UsersIcon, BuildingStorefrontIcon, ClockIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
+import { API_ENDPOINTS } from '../../config/api';
 
 const AdminDashboardHome = () => {
     const { user } = useAuth();
@@ -22,7 +23,7 @@ const AdminDashboardHome = () => {
             }
             
             const config = { headers: { Authorization: `Bearer ${user.token}` } };
-            const res = await axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/admin/stats`, config);
+            const res = await axios.get(`${API_ENDPOINTS.ADMIN}/stats`, config);
             setStats(res.data);
         } catch (err) {
             console.error('Failed to fetch stats:', err);

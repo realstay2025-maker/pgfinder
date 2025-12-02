@@ -35,7 +35,8 @@ const UserSchema = new mongoose.Schema({
     lastLogin: { type: Date },
     loginAttempts: { type: Number, default: 0 },
     lockUntil: { type: Date },
-    isActive: { type: Boolean, default: true }
+    isActive: { type: Boolean, default: true },
+    listingEnabled: { type: Boolean, default: true }
 }, { timestamps: true });
 
 // Pre-save hook to hash the password before saving

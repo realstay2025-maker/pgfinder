@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { API_ENDPOINTS } from '../config/api';
 import { Link } from 'react-router-dom';
 import { PhoneIcon, EnvelopeIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import Header from '../components/Header';
@@ -12,7 +13,7 @@ const ContactUs = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            await axios.post('http://localhost:5000/api/contact/general', formData);
+            await axios.post(`${API_ENDPOINTS.CONTACT}/general`, formData);
             alert('Message sent successfully! We will get back to you soon.');
             setFormData({ name: '', email: '', subject: '', message: '' });
         } catch (err) {

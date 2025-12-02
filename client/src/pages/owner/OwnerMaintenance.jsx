@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_ENDPOINTS } from '../../config/api';
 import { useAuth } from '../../context/AuthContext';
 import { WrenchScrewdriverIcon, CheckCircleIcon, ClockIcon } from '@heroicons/react/24/outline';
 import axios from 'axios';
@@ -11,7 +12,7 @@ const OwnerMaintenance = () => {
     const fetchRequests = async () => {
         try {
             const config = { headers: { Authorization: `Bearer ${user.token}` } };
-            const res = await axios.get('http://localhost:5000/api/owner/maintenance', config);
+            const res = await axios.get(`${API_ENDPOINTS.OWNER}/maintenance`, config);
             setRequests(res.data);
         } catch (err) {
             console.error('Failed to fetch maintenance requests:', err);
@@ -21,7 +22,7 @@ const OwnerMaintenance = () => {
     const updateStatus = async (id, status) => {
         try {
             const config = { headers: { Authorization: `Bearer ${user.token}` } };
-            await axios.put(`http://localhost:5000/api/owner/maintenance/${id}`, { status }, config);
+            await axios.put(`${API_ENDPOINTS.OWNER}/maintenance/${id}`, { status }, config);
             fetchRequests();
         } catch (err) {
             console.error('Failed to update status:', err);

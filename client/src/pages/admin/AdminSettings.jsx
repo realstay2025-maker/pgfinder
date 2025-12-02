@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { CogIcon, BellIcon, ShieldCheckIcon, CircleStackIcon, UserIcon, KeyIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../../context/AuthContext';
 import ChangePassword from '../../components/ChangePassword';
+import axios from 'axios';
+import { API_ENDPOINTS } from '../../config/api';
 
 const AdminSettings = () => {
     const { user } = useAuth();
@@ -41,6 +43,16 @@ const AdminSettings = () => {
                 [key]: value
             }
         }));
+    };
+
+    const handleSaveSettings = async () => {
+        try {
+            const config = { headers: { Authorization: `Bearer ${user.token}` } };
+            await axios.put(`${API_ENDPOINTS.ADMIN}/settings`, settings, config);
+            alert('Settings saved successfully!');
+        } catch (err) {
+            alert('Failed to save settings: ' + (err.response?.data?.message || err.message));
+        }
     };
 
     return (
@@ -227,7 +239,10 @@ const AdminSettings = () => {
 
             {/* Save Button */}
             <div className="mt-8 text-center">
-                <button className="bg-gradient-to-r from-green-500 to-blue-600 text-white px-12 py-4 rounded-2xl font-bold text-lg hover:from-green-600 hover:to-blue-700 transform hover:scale-105 transition-all duration-200 shadow-lg">
+                <button 
+                    onClick={handleSaveSettings}
+                    className="bg-gradient-to-r from-green-500 to-blue-600 text-white px-12 py-4 rounded-2xl font-bold text-lg hover:from-green-600 hover:to-blue-700 transform hover:scale-105 transition-all duration-200 shadow-lg"
+                >
                     💾 Save All Settings
                 </button>
             </div>

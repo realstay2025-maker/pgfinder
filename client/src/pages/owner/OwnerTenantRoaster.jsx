@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { API_ENDPOINTS } from '../../config/api';
 import { 
     HomeModernIcon, 
     UsersIcon, 
@@ -21,7 +22,7 @@ import { useAuth } from '../../context/AuthContext';
 import OnboardTenantModal from './OnboardTenantModal';
 
 // API endpoint for the detailed room roster
-const API_ROSTER = 'http://localhost:5000/api/properties/owner/roster';
+
 
 const OwnerTenantRoster = () => {
     const { user } = useAuth();
@@ -79,7 +80,7 @@ const OwnerTenantRoster = () => {
                 tenantData.roomNumber = selectedRoomType.roomNumber;
             }
             
-            await axios.post(`http://localhost:5000/api/properties/${selectedRoomType.propertyId}/assign-tenant`, {
+            await axios.post(`${API_ENDPOINTS.PROPERTIES}/${selectedRoomType.propertyId}/assign-tenant`, {
                 roomTypeIndex: selectedRoomType.index,
                 tenantData
             }, config);
@@ -98,7 +99,7 @@ const OwnerTenantRoster = () => {
         try {
             const config = { headers: { Authorization: `Bearer ${user.token}` } };
             
-            await axios.post(`http://localhost:5000/api/owner/remove-tenant`, {
+            await axios.post(`${API_ENDPOINTS.OWNER}/remove-tenant`, {
                 tenantId: tenantId,
                 propertyId: selectedRoom.propertyId,
                 bedId: selectedRoom.tenants.find(t => t._id === tenantId)?.bedId
@@ -141,7 +142,7 @@ const OwnerTenantRoster = () => {
             const config = { headers: { Authorization: `Bearer ${user.token}` } };
             
             // Update room number in Room collection
-            await axios.put(`http://localhost:5000/api/rooms/${selectedRoom.roomId}`, {
+            await axios.put(`${API_ENDPOINTS.ROOMS}/${selectedRoom.roomId}`, {
                 roomNumber: editingRoom.newNumber
             }, config);
             
@@ -159,7 +160,7 @@ const OwnerTenantRoster = () => {
         try {
             const config = { headers: { Authorization: `Bearer ${user.token}` } };
             
-            await axios.delete(`http://localhost:5000/api/rooms/${selectedRoom.roomId}`, config);
+            await axios.delete(`${API_ENDPOINTS.ROOMS}/${selectedRoom.roomId}`, config);
             
             setShowRoomModal(false);
             fetchRoster();
@@ -612,18 +613,40 @@ const OwnerTenantRoster = () => {
                             <div className="mb-6">
                                 <h4 className="font-semibold mb-3 text-gray-800">Current Tenants:</h4>
                                 <div className="space-y-3">
-                                    {selectedRoom.tenants.map((tenant) => (
-                                        <div key={tenant._id} className="flex items-center justify-between bg-gradient-to-r from-gray-50 to-gray-100 p-4 rounded-xl border border-gray-200">
-                                            <div className="flex items-center space-x-3">
-                                                <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold shadow-lg">
-                                                    {tenant.name.charAt(0)}
+                                    {selectedRoom.tenants.map((tenant) => {
+                                        const isNoticeApproved = tenant.status === 'notice';
+                                        return (
+                                            <div key={tenant._id} className={`flex items-center justify-between p-4 rounded-xl border ${
+                                                isNoticeApproved 
+                                                    ? 'bg-gradient-to-r from-orange-50 to-red-50 border-orange-200' 
+                                                    : 'bg-gradient-to-r from-gray-50 to-gray-100 border-gray-200'
+                                            }`}>
+                                                <div className="flex items-center space-x-3">
+                                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold shadow-lg ${
+                                                        isNoticeApproved 
+                                                            ? 'bg-gradient-to-br from-orange-500 to-red-600' 
+                                                            : 'bg-gradient-to-br from-indigo-500 to-purple-600'
+                                                    }`}>
+                                                        {tenant.name.charAt(0)}
+                                                    </div>
+                                                    <div>
+                                                        <div className="flex items-center space-x-2">
+                                                            <span className="font-medium text-gray-800">{tenant.name}</span>
+                                                            {isNoticeApproved && (
+                                                                <span className="px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-full font-medium">
+                                                                    Notice Period
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        {tenant.phone && <div className="text-sm text-gray-500">{tenant.phone}</div>}
+                                                        <div className="text-xs text-gray-400">Bed: {tenant.bedId}</div>
+                                                        {isNoticeApproved && tenant.vacateDate && (
+                                                            <div className="text-xs text-orange-600 font-medium">
+                                                                Vacating: {new Date(tenant.vacateDate).toLocaleDateString()}
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <div className="font-medium text-gray-800">{tenant.name}</div>
-                                                    {tenant.phone && <div className="text-sm text-gray-500">{tenant.phone}</div>}
-                                                    <div className="text-xs text-gray-400">Bed: {tenant.bedId}</div>
-                                                </div>
-                                            </div>
                                             <div className="flex items-center space-x-2">
                                                 {tenant.phone && (
                                                     <button
@@ -640,8 +663,9 @@ const OwnerTenantRoster = () => {
                                                     <TrashIcon className="w-4 h-4" />
                                                 </button>
                                             </div>
-                                        </div>
-                                    ))}
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             </div>
                         ) : (

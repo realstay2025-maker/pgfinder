@@ -372,10 +372,10 @@ exports.getTenantsWithPayments = async (req, res) => {
         const startOfMonth = new Date(targetDate.getFullYear(), targetDate.getMonth(), 1);
         const endOfMonth = new Date(targetDate.getFullYear(), targetDate.getMonth() + 1, 0);
         
-        // Get all active tenants for owner
+        // Get all active tenants for owner (including notice period)
         const tenants = await Tenant.find({
             ownerId,
-            status: 'active',
+            status: { $in: ['active', 'notice'] },
             roomId: { $exists: true, $ne: null }
         }).populate('propertyId', 'title');
         
@@ -523,12 +523,18 @@ exports.updatePaymentStatus = async (req, res) => {
             notes: `Payment ${status} by owner - ${new Date().toLocaleDateString()}`
         };
         
+        // Create unique identifier for tenant-month combination
+        const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        
         const payment = await Payment.findOneAndUpdate(
             { 
                 tenantId,
                 dueDate: { $gte: currentMonth, $lte: nextMonth }
             },
-            updateData,
+            {
+                ...updateData,
+                paymentMonth: monthKey // Add month identifier to prevent duplicates
+            },
             { 
                 upsert: true, 
                 new: true,

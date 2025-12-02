@@ -2,6 +2,7 @@
 const User = require('../models/User');
 const Property = require('../models/Property');
 const Tenant = require('../models/Tenant');
+const Subscription = require('../models/Subscription');
 
 // @desc    Get all users
 // @route   GET /api/admin/users
@@ -43,6 +44,28 @@ exports.deleteUser = async (req, res) => {
     }
 };
 
+// @desc    Toggle PG listing status
+// @route   PUT /api/admin/users/:id/listing
+// @access  Private (Admin)
+exports.toggleListing = async (req, res) => {
+    try {
+        const { listingEnabled } = req.body;
+        const user = await User.findByIdAndUpdate(
+            req.params.id,
+            { listingEnabled },
+            { new: true }
+        ).select('-password');
+        
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        
+        res.json({ message: `Listing ${listingEnabled ? 'enabled' : 'disabled'} successfully`, user });
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to update listing status', details: err.message });
+    }
+};
+
 // @desc    Get admin dashboard statistics
 // @route   GET /api/admin/stats
 // @access  Private (Admin)
@@ -67,5 +90,56 @@ exports.getAdminStats = async (req, res) => {
     } catch (err) {
         console.error('Get Admin Stats Error:', err);
         res.status(500).json({ error: 'Failed to fetch statistics', details: err.message });
+    }
+};
+
+// @desc    Get all subscriptions
+// @route   GET /api/admin/subscriptions
+// @access  Private (Admin)
+exports.getSubscriptions = async (req, res) => {
+    try {
+        const subscriptions = await Subscription.find()
+            .populate('ownerId', 'name email ownerProfile')
+            .sort({ createdAt: -1 });
+        res.json(subscriptions);
+    } catch (error) {
+        console.error('Get subscriptions error:', error);
+        res.status(500).json({ message: 'Failed to fetch subscriptions', error: error.message });
+    }
+};
+
+// @desc    Get subscription history for owner
+// @route   GET /api/admin/subscription-history/:ownerId
+// @access  Private (Admin)
+exports.getSubscriptionHistory = async (req, res) => {
+    try {
+        const history = await Subscription.find({ ownerId: req.params.ownerId })
+            .populate('ownerId', 'name email')
+            .sort({ createdAt: -1 });
+        res.json(history);
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to fetch history', error: error.message });
+    }
+};
+
+// @desc    Update subscription status
+// @route   PUT /api/admin/subscriptions/:id
+// @access  Private (Admin)
+exports.updateSubscriptionStatus = async (req, res) => {
+    try {
+        const { status } = req.body;
+        const subscription = await Subscription.findByIdAndUpdate(
+            req.params.id,
+            { status },
+            { new: true }
+        ).populate('ownerId', 'name email');
+        
+        if (!subscription) {
+            return res.status(404).json({ message: 'Subscription not found' });
+        }
+        
+        res.json({ message: 'Subscription updated successfully', subscription });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to update subscription', error: error.message });
     }
 };

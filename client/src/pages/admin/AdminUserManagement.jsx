@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { UsersIcon, TrashIcon, EyeIcon, MagnifyingGlassIcon, FunnelIcon, XMarkIcon, UserPlusIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
+import { API_ENDPOINTS } from '../../config/api';
 
 const AdminUserManagement = () => {
     const { user } = useAuth();
@@ -13,6 +14,15 @@ const AdminUserManagement = () => {
     const [showModal, setShowModal] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [roleFilter, setRoleFilter] = useState('all');
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage] = useState(10);
+    
+    // Pagination calculations
+    const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+    const paginatedUsers = filteredUsers.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
 
     useEffect(() => {
         fetchUsers();
@@ -20,13 +30,16 @@ const AdminUserManagement = () => {
 
     useEffect(() => {
         filterUsers();
+        setCurrentPage(1); // Reset to first page when filters change
     }, [users, searchTerm, roleFilter]);
 
     const fetchUsers = async () => {
         try {
             const config = { headers: { Authorization: `Bearer ${user.token}` } };
-            const res = await axios.get('http://localhost:5000/api/admin/users', config);
-            setUsers(res.data);
+            const res = await axios.get(`${API_ENDPOINTS.ADMIN}/users`, config);
+            // Filter out admin users
+            const nonAdminUsers = res.data.filter(u => u.role !== 'admin' && u.role !== 'super_admin');
+            setUsers(nonAdminUsers);
         } catch (err) {
             console.error('Failed to fetch users:', err);
         } finally {
@@ -55,10 +68,21 @@ const AdminUserManagement = () => {
         if (!window.confirm('Are you sure you want to delete this user?')) return;
         try {
             const config = { headers: { Authorization: `Bearer ${user.token}` } };
-            await axios.delete(`http://localhost:5000/api/admin/users/${userId}`, config);
+            await axios.delete(`${API_ENDPOINTS.ADMIN}/users/${userId}`, config);
             setUsers(users.filter(u => u._id !== userId));
         } catch (err) {
             console.error('Failed to delete user:', err);
+        }
+    };
+
+    const toggleListing = async (userId, listingEnabled) => {
+        try {
+            const config = { headers: { Authorization: `Bearer ${user.token}` } };
+            await axios.put(`${API_ENDPOINTS.ADMIN}/users/${userId}/listing`, { listingEnabled }, config);
+            setUsers(users.map(u => u._id === userId ? { ...u, listingEnabled } : u));
+            alert(`Listing ${listingEnabled ? 'enabled' : 'disabled'} successfully!`);
+        } catch (err) {
+            alert('Failed to update listing status');
         }
     };
 
@@ -114,9 +138,9 @@ const AdminUserManagement = () => {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                 {[
                     { label: 'Total Users', count: users.length, color: 'purple', icon: '👥' },
-                    { label: 'Admins', count: users.filter(u => u.role === 'admin' || u.role === 'super_admin').length, color: 'red', icon: '👑' },
                     { label: 'PG Owners', count: users.filter(u => u.role === 'pg_owner').length, color: 'blue', icon: '🏠' },
-                    { label: 'Tenants', count: users.filter(u => u.role === 'tenant').length, color: 'green', icon: '👤' }
+                    { label: 'Tenants', count: users.filter(u => u.role === 'tenant').length, color: 'green', icon: '👤' },
+                    { label: 'Active Listings', count: users.filter(u => u.role === 'pg_owner' && u.listingEnabled).length, color: 'emerald', icon: '✅' }
                 ].map((stat, index) => (
                     <div key={index} className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-lg">
                         <div className="flex items-center justify-between">
@@ -151,8 +175,8 @@ const AdminUserManagement = () => {
                             className="pl-10 pr-8 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white"
                         >
                             <option value="all">All Roles</option>
-                            <option value="admin">Admin</option>
-                            <option value="super_admin">Super Admin</option>
+                            {/* <option value="admin">Admin</option>
+                            <option value="super_admin">Super Admin</option> */}
                             <option value="pg_owner">PG Owner</option>
                             <option value="tenant">Tenant</option>
                         </select>
@@ -169,61 +193,115 @@ const AdminUserManagement = () => {
                 </div>
             </div>
 
-            {/* Users Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredUsers.map((userData) => (
-                    <div key={userData._id} className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                        <div className="flex items-start justify-between mb-4">
-                            <div className="flex items-center">
-                                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-lg mr-4">
-                                    {userData.name.charAt(0).toUpperCase()}
-                                </div>
-                                <div>
-                                    <h3 className="font-bold text-gray-900 text-lg">{userData.name}</h3>
-                                    <p className="text-gray-600 text-sm">{userData.email}</p>
-                                </div>
-                            </div>
-                            <span className={`px-3 py-1 text-xs font-bold rounded-full ${getRoleBadge(userData.role)} flex items-center`}>
-                                <span className="mr-1">{getRoleIcon(userData.role)}</span>
-                                {userData.role.replace('_', ' ').toUpperCase()}
-                            </span>
-                        </div>
-                        
-                        <div className="space-y-2 mb-4">
-                            <div className="flex justify-between text-sm">
-                                <span className="text-gray-600">Status:</span>
-                                <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">Active</span>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                                <span className="text-gray-600">Joined:</span>
-                                <span className="font-medium">{new Date(userData.createdAt).toLocaleDateString()}</span>
-                            </div>
-                            {userData.role === 'tenant' && userData.tenantProfile && (
-                                <div className="flex justify-between text-sm">
-                                    <span className="text-gray-600">PG:</span>
-                                    <span className="font-medium">{userData.tenantProfile.pgName || 'Not assigned'}</span>
-                                </div>
-                            )}
-                        </div>
-                        
-                        <div className="flex gap-2">
-                            <button 
-                                onClick={() => { setSelectedUser(userData); setShowModal(true); }}
-                                className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 text-white py-2 px-4 rounded-xl font-semibold hover:from-blue-600 hover:to-purple-700 transition-all duration-200 flex items-center justify-center"
-                            >
-                                <EyeIcon className="w-4 h-4 mr-2" />
-                                View
-                            </button>
-                            <button 
-                                onClick={() => deleteUser(userData._id)}
-                                className="bg-red-500 text-white py-2 px-4 rounded-xl font-semibold hover:bg-red-600 transition-colors flex items-center justify-center"
-                            >
-                                <TrashIcon className="w-4 h-4" />
-                            </button>
-                        </div>
-                    </div>
-                ))}
+            {/* Pagination */}
+            <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-4 mb-6 border border-white/20 shadow-lg flex justify-between items-center">
+                <div className="text-sm text-gray-600">
+                    Showing {Math.min((currentPage - 1) * itemsPerPage + 1, filteredUsers.length)} to {Math.min(currentPage * itemsPerPage, filteredUsers.length)} of {filteredUsers.length} users
+                </div>
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                        disabled={currentPage === 1}
+                        className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+                    >
+                        Previous
+                    </button>
+                    <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded font-medium">
+                        {currentPage} of {totalPages}
+                    </span>
+                    <button
+                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                        disabled={currentPage === totalPages}
+                        className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+                    >
+                        Next
+                    </button>
+                </div>
             </div>
+
+            {/* Users Table */}
+            <div className="bg-white/80 backdrop-blur-lg rounded-2xl border border-white/20 shadow-lg overflow-hidden">
+                <div className="overflow-x-auto">
+                    <table className="w-full">
+                        <thead className="bg-gradient-to-r from-purple-500 to-blue-600 text-white">
+                            <tr>
+                                <th className="px-6 py-4 text-left font-semibold">User</th>
+                                <th className="px-6 py-4 text-left font-semibold">Role</th>
+                                <th className="px-6 py-4 text-left font-semibold">Status</th>
+                                <th className="px-6 py-4 text-left font-semibold">Joined</th>
+                                <th className="px-6 py-4 text-center font-semibold">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200">
+                            {paginatedUsers.map((userData, index) => (
+                                <tr key={userData._id} className={`hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}>
+                                    <td className="px-6 py-4">
+                                        <div className="flex items-center">
+                                            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold mr-4">
+                                                {userData.name.charAt(0).toUpperCase()}
+                                            </div>
+                                            <div>
+                                                <div className="font-semibold text-gray-900">{userData.name}</div>
+                                                <div className="text-sm text-gray-600">{userData.email}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <span className={`px-3 py-1 text-xs font-bold rounded-full ${getRoleBadge(userData.role)} flex items-center w-fit`}>
+                                            <span className="mr-1">{getRoleIcon(userData.role)}</span>
+                                            {userData.role.replace('_', ' ').toUpperCase()}
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <div className="flex flex-col gap-1">
+                                            <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium w-fit">Active</span>
+                                            {userData.role === 'pg_owner' && (
+                                                <span className={`px-2 py-1 rounded-full text-xs font-medium w-fit ${
+                                                    userData.listingEnabled ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'
+                                                }`}>
+                                                    {userData.listingEnabled ? 'Listed' : 'Unlisted'}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 text-sm text-gray-600">
+                                        {new Date(userData.createdAt).toLocaleDateString()}
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <div className="flex gap-2 justify-center">
+                                            <button 
+                                                onClick={() => { setSelectedUser(userData); setShowModal(true); }}
+                                                className="bg-blue-500 text-white py-1 px-3 rounded text-xs hover:bg-blue-600"
+                                            >
+                                                View
+                                            </button>
+                                            {userData.role === 'pg_owner' && (
+                                                <button 
+                                                    onClick={() => toggleListing(userData._id, !userData.listingEnabled)}
+                                                    className={`py-1 px-3 rounded text-xs font-semibold ${
+                                                        userData.listingEnabled 
+                                                            ? 'bg-yellow-500 hover:bg-yellow-600 text-white' 
+                                                            : 'bg-green-500 hover:bg-green-600 text-white'
+                                                    }`}
+                                                >
+                                                    {userData.listingEnabled ? 'Disable' : 'Enable'}
+                                                </button>
+                                            )}
+                                            <button 
+                                                onClick={() => deleteUser(userData._id)}
+                                                className="bg-red-500 text-white py-1 px-3 rounded text-xs hover:bg-red-600"
+                                            >
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
 
             {filteredUsers.length === 0 && !loading && (
                 <div className="text-center py-12">

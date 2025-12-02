@@ -40,7 +40,7 @@ const OwnerLayout = () => { // <<< REMOVED { children } prop
         { name: 'Tenants & Rooms', path: '/owner/tenants', icon: UsersIcon },
         { name: 'Complaints', path: '/owner/complaints', icon: TicketIcon },
         { name: 'Payments & Dues', path: '/owner/payments', icon: CreditCardIcon },
-        // { name: 'Notices', path: '/owner/notices', icon: SpeakerWaveIcon },
+        { name: 'Notices', path: '/owner/notices', icon: SpeakerWaveIcon },
         // { name: 'Maintenance', path: '/owner/maintenance', icon: WrenchScrewdriverIcon },
         // { name: 'Invoices', path: '/owner/invoices', icon: DocumentTextIcon },
         { name: 'Owner Profile', path: '/owner/profile', icon: UserCircleIcon },

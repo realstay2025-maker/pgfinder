@@ -8,7 +8,7 @@ const { apiLimiter } = require('./src/middleware/rateLimiter');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const MONGODB_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/pgmanagement';
+const MONGODB_URI = process.env.MONGO_URI || 'mongodb+srv://your_username:your_password@cluster0.xxxxx.mongodb.net/pgmanagement?retryWrites=true&w=majority';
 
 // Import Routes
 const authRoutes = require('./src/routes/auth'); 
@@ -21,6 +21,8 @@ const complaintRoutes = require('./src/routes/complaint');
 const adminRoutes = require('./src/routes/admin');
 const contactRoutes = require('./src/routes/contact');
 const bookingRoutes = require('./src/routes/booking');
+const noticeRoutes = require('./src/routes/notice');
+const { scheduleSubscriptionReminders } = require('./src/utils/emailReminder');
 
 
 // const ownerSetupRoutes = require('./src/routes/owner_setup');
@@ -36,14 +38,14 @@ app.use(helmet({
             defaultSrc: ["'self'"],
             styleSrc: ["'self'", "'unsafe-inline'"],
             scriptSrc: ["'self'"],
-            imgSrc: ["'self'", "data:", "https:", "http://localhost:5000"],
+            imgSrc: ["'self'", "data:", "https:", process.env.NODE_ENV === 'production' ? "" : "http://localhost:5000"].filter(Boolean),
         },
     },
 }));
 
 // CORS Configuration
 app.use(cors({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+    origin: process.env.CORS_ORIGIN || (process.env.NODE_ENV === 'production' ? false : 'http://localhost:5173'),
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
@@ -80,6 +82,7 @@ app.use('/api/complaints', complaintRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/bookings', bookingRoutes);
+app.use('/api/notices', noticeRoutes);
 
 
 
@@ -101,4 +104,8 @@ app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
     console.log(`🔒 Security features enabled`);
     console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+    
+    // Start subscription reminder scheduler
+    scheduleSubscriptionReminders();
+    console.log(`📧 Subscription reminder scheduler started`);
 });

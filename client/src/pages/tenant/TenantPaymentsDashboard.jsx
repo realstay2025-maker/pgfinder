@@ -10,7 +10,7 @@ import {
     DocumentArrowDownIcon
 } from '@heroicons/react/24/outline';
 
-const API_TENANT_PAYMENTS = 'http://localhost:5000/api/payments/tenant/my-payments';
+import { API_ENDPOINTS } from '../../config/api';
 
 const formatCurrency = (amount) => `₹${new Intl.NumberFormat('en-IN').format(amount)}`;
 const formatDate = (dateString) => new Date(dateString).toLocaleDateString();
@@ -38,7 +38,7 @@ const TenantPaymentsDashboard = () => {
             const config = { headers: { Authorization: `Bearer ${user.token}` } };
             const [paymentsRes, invoicesRes] = await Promise.all([
                 axios.get(API_TENANT_PAYMENTS, config),
-                axios.get('http://localhost:5000/api/tenant/invoices', config)
+                axios.get(`${API_ENDPOINTS.TENANT}/invoices`, config)
             ]);
             setData(paymentsRes.data);
             setInvoices(invoicesRes.data);
@@ -56,7 +56,7 @@ const TenantPaymentsDashboard = () => {
                 headers: { Authorization: `Bearer ${user.token}` },
                 responseType: 'blob'
             };
-            const res = await axios.get(`http://localhost:5000/api/tenant/invoice/${invoiceId}/pdf`, config);
+            const res = await axios.get(`${API_ENDPOINTS.TENANT}/invoice/${invoiceId}/pdf`, config);
             
             const blob = new Blob([res.data], { type: 'application/pdf' });
             const url = window.URL.createObjectURL(blob);

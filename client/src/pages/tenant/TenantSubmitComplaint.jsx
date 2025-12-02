@@ -4,8 +4,8 @@ import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
 import { ExclamationCircleIcon } from '@heroicons/react/24/outline';
 
-const API_COMPLAINTS_URL = 'http://localhost:5000/api/complaints';
-const API_TENANT_LEASE_URL = 'http://localhost:5000/api/tenants/my-lease-info';
+import { API_ENDPOINTS } from '../../config/api';
+
 
 const priorityOptions = ['Low', 'Medium', 'High', 'Urgent'];
 const categoryOptions = ['Maintenance', 'Utility', 'Safety', 'Noise', 'Other'];
@@ -30,7 +30,7 @@ const TenantSubmitComplaint = () => {
         setFetchLoading(true);
         try {
             const config = { headers: { Authorization: `Bearer ${user.token}` } };
-            const res = await axios.get('http://localhost:5000/api/tenant/my-lease-info', config); 
+            const res = await axios.get(`${API_ENDPOINTS.TENANT}/my-lease-info`, config); 
             const info = res.data;
             
             setLeaseInfo(info);

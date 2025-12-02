@@ -4,8 +4,8 @@ import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
 import { ArrowPathIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
-const API_ONBOARD_URL = 'http://localhost:5000/api/tenants/onboard';
-const API_ROOMS_URL = 'http://localhost:5000/api/rooms/available'; // Assuming a generic API to fetch owner's rooms
+import { API_ENDPOINTS } from '../../config/api';
+ // Assuming a generic API to fetch owner's rooms
 
 const OnboardTenantModal = ({ onClose, onSuccess }) => {
     const { user } = useAuth();
@@ -32,7 +32,7 @@ const OnboardTenantModal = ({ onClose, onSuccess }) => {
                 const config = { headers: { Authorization: `Bearer ${user.token}` } };
                 const [roomsRes, tenantsRes] = await Promise.all([
                     axios.get(API_ROOMS_URL, config),
-                    axios.get('http://localhost:5000/api/owner/available-tenants', config)
+                    axios.get(`${API_ENDPOINTS.OWNER}/available-tenants`, config)
                 ]);
                 
                 // console.log('Rooms data:', roomsRes.data);
@@ -103,7 +103,7 @@ const OnboardTenantModal = ({ onClose, onSuccess }) => {
         try {
             const config = { headers: { Authorization: `Bearer ${user.token}` } };
             console.log('Submitting form data:', formData);
-            const res = await axios.post('http://localhost:5000/api/owner/assign-tenant-room', formData, config);
+            const res = await axios.post(`${API_ENDPOINTS.OWNER}/assign-tenant-room`, formData, config);
             
             setSuccessMessage(`Tenant successfully assigned to room!`);
             

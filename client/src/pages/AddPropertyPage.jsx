@@ -3,9 +3,8 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { MinusCircleIcon, PlusCircleIcon, PhotoIcon, TrashIcon } from '@heroicons/react/24/outline'; 
-
-const API_URL = 'http://localhost:5000/api/properties';
+import { MinusCircleIcon, PlusCircleIcon, PhotoIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { API_ENDPOINTS } from '../config/api';
 const roomSharingOptions = ['single', 'double', 'triple', 'quad'];
 
 const AddPropertyPage = () => {
@@ -111,7 +110,7 @@ const AddPropertyPage = () => {
                 },
             };
 
-            await axios.post(`${API_URL}/add`, formData, config);
+            await axios.post(`${API_ENDPOINTS.PROPERTIES}/add`, formData, config);
             
             setSuccess('Property submitted successfully! Redirecting...');
             setTimeout(() => navigate('/owner/properties'), 1500);

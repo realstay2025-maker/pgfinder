@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
 
-const API_COMPLAINT_URL = 'http://localhost:5000/api/complaints';
+import { API_ENDPOINTS } from '../../config/api';
 
 const ComplaintResolutionModal = ({ complaint, onClose, onUpdateSuccess }) => {
     const { user } = useAuth();

@@ -11,35 +11,59 @@ import {
     CheckCircleIcon,
     ClockIcon,
     XCircleIcon,
-    MapPinIcon
+    MapPinIcon,
+    CreditCardIcon
 } from '@heroicons/react/24/outline';
 import { Link } from 'react-router-dom';
-
-// Base URL for property operations
-const API_OWNER_PROPERTIES = 'http://localhost:5000/api/properties/my';
-// Base URL for serving static uploaded images
-// Note: You must ensure your backend serves the 'uploads' folder statically!
-const BASE_UPLOAD_URL = 'http://localhost:5000'; 
+import { API_ENDPOINTS } from '../../config/api';
+import SubscriptionModal from '../../components/SubscriptionModal'; 
 
 const OwnerProperties = () => {
     const { user } = useAuth();
     const [properties, setProperties] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
 
     const fetchOwnerProperties = async () => {
-        if (!user || user.role !== 'pg_owner') return;
+        if (!user) {
+            setError('Please log in to view your properties');
+            setLoading(false);
+            return;
+        }
+        
+        if (user.role !== 'pg_owner') {
+            setError('Access denied. Owner account required.');
+            setLoading(false);
+            return;
+        }
+
+        if (!user.token) {
+            setError('Authentication token missing. Please log in again.');
+            setLoading(false);
+            return;
+        }
 
         setLoading(true);
         setError(null);
         try {
-            const config = { headers: { Authorization: `Bearer ${user.token}` } };
-            const res = await axios.get(API_OWNER_PROPERTIES, config);
+            const config = { 
+                headers: { 
+                    'Authorization': `Bearer ${user.token}`,
+                    'Content-Type': 'application/json'
+                } 
+            };
+            const res = await axios.get(`${API_ENDPOINTS.PROPERTIES}/my`, config);
             setProperties(res.data);
             
         } catch (err) {
-            console.error("Fetch Owner Properties Error:", err.response?.data?.error || err.message);
-            setError(err.response?.data?.error || "Failed to load properties. Check backend owner API route.");
+            console.error("Fetch Owner Properties Error:", err.response?.data);
+            if (err.response?.status === 401) {
+                setError('Session expired. Please log in again.');
+                // Optionally redirect to login
+            } else {
+                setError(err.response?.data?.message || 'Failed to load properties');
+            }
         } finally {
             setLoading(false);
         }
@@ -52,7 +76,7 @@ const OwnerProperties = () => {
 
         try {
             const config = { headers: { Authorization: `Bearer ${user.token}` } };
-            await axios.delete(`http://localhost:5000/api/properties/${propertyId}`, config);
+            await axios.delete(`${API_ENDPOINTS.PROPERTIES}/${propertyId}`, config);
             
             // Remove from local state
             setProperties(properties.filter(p => p._id !== propertyId));
@@ -115,12 +139,20 @@ const OwnerProperties = () => {
                 <h1 className="text-2xl md:text-3xl font-bold text-gray-800 flex items-center">
                     <HomeModernIcon className="w-7 h-7 mr-2 text-primary-dark" /> Your Listed Properties ({properties.length})
                 </h1>
-                <Link 
-                    to="/owner/add-property" 
-                    className="flex items-center py-2 px-4 rounded-md text-white bg-primary-dark hover:bg-blue-900 transition text-sm font-medium"
-                >
-                    <CheckCircleIcon className="w-5 h-5 mr-1" /> Add New Property
-                </Link>
+                <div className="flex gap-3">
+                    <button
+                        onClick={() => setShowSubscriptionModal(true)}
+                        className="flex items-center py-2 px-4 rounded-md text-white bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 transition text-sm font-medium"
+                    >
+                        <CreditCardIcon className="w-5 h-5 mr-1" /> Subscribe
+                    </button>
+                    <Link 
+                        to="/owner/add-property" 
+                        className="flex items-center py-2 px-4 rounded-md text-white bg-primary-dark hover:bg-blue-900 transition text-sm font-medium"
+                    >
+                        <CheckCircleIcon className="w-5 h-5 mr-1" /> Add New Property
+                    </Link>
+                </div>
             </div>
 
             {properties.length === 0 ? (
@@ -138,7 +170,7 @@ const OwnerProperties = () => {
                                 <div className="md:col-span-1">
                                     <img 
                                         src={property.images && property.images.length > 0 
-                                             ? `${BASE_UPLOAD_URL}${property.images[0]}` // Use the first uploaded image path
+                                             ? `${import.meta.env.VITE_API_URL}${property.images[0]}` 
                                              : 'https://via.placeholder.com/150?text=No+Image'}
                                         alt={property.title}
                                         className="w-full h-32 object-cover rounded-lg border border-gray-200"
@@ -195,6 +227,11 @@ const OwnerProperties = () => {
                     ))}
                 </div>
             )}
+            
+            <SubscriptionModal 
+                isOpen={showSubscriptionModal} 
+                onClose={() => setShowSubscriptionModal(false)} 
+            />
         </div>
     );
 };

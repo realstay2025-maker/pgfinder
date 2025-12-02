@@ -196,7 +196,7 @@ const PropertyDetails = () => {
                         <form onSubmit={async (e) => {
                             e.preventDefault();
                             try {
-                                await axios.post(API_ENDPOINTS.CONTACT, {
+                                await axios.post(`${API_ENDPOINTS.CONTACT}`, {
                                     ...contactForm,
                                     propertyId: id,
                                     propertyTitle: property.title
@@ -262,7 +262,7 @@ const PropertyDetails = () => {
                         <form onSubmit={async (e) => {
                             e.preventDefault();
                             try {
-                                await axios.post(API_ENDPOINTS.BOOKINGS, {
+                                await axios.post(`${API_ENDPOINTS.BOOKINGS}`, {
                                     ...bookingForm,
                                     propertyId: id,
                                     propertyTitle: property.title

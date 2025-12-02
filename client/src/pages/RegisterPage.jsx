@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import axios from 'axios';
+import { API_ENDPOINTS } from '../config/api';
 
 const RegisterPage = () => {
   const [name, setName] = useState('');
@@ -41,7 +42,7 @@ const RegisterPage = () => {
 
   const fetchProperties = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/properties/names');
+      const res = await axios.get(`${API_ENDPOINTS.PROPERTIES}/names`);
       // console.log('Fetched properties:', res.data);
       setProperties(res.data);
     } catch (err) {

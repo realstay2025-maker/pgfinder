@@ -194,10 +194,18 @@ exports.getPublicProperties = async (req, res) => {
         }
 
         const properties = await Property.find(query)
+            .populate({
+                path: 'ownerId',
+                match: { listingEnabled: true },
+                select: 'listingEnabled'
+            })
             .select('title address basePrice propertyType roomTypes amenities images')
             .sort({ basePrice: 1 });
+        
+        // Filter out properties where owner has listing disabled
+        const filteredProperties = properties.filter(property => property.ownerId);
 
-        res.status(200).json(properties);
+        res.status(200).json(filteredProperties);
 
     } catch (err) {
         console.error("Public Property Fetch Error:", err);
@@ -218,11 +226,15 @@ exports.getRoomRoster = async (req, res) => {
             return res.status(200).json([]);
         }
 
-        // Get rooms with populated tenant data
+        // Get rooms with tenant data from Tenant collection
         const roster = await Promise.all(properties.map(async (property) => {
-            const rooms = await Room.find({ propertyId: property._id })
-                .populate('tenants.tenantId', 'name email phone')
-                .lean();
+            const rooms = await Room.find({ propertyId: property._id }).lean();
+            
+            // Get all tenants for this property
+            const tenants = await Tenant.find({ 
+                propertyId: property._id,
+                status: { $in: ['active', 'notice'] }
+            }).select('name phone email status vacateDate roomId bedId').lean();
             
             // Group rooms by sharing type and format like RoomManagement
             const roomsByType = rooms.reduce((acc, room) => {
@@ -230,24 +242,28 @@ exports.getRoomRoster = async (req, res) => {
                     acc[room.roomType] = [];
                 }
                 
+                // Get tenants for this specific room
+                const roomTenants = tenants.filter(t => t.roomId?.toString() === room._id.toString());
+                
                 // Format room data to match RoomManagement structure
                 acc[room.roomType].push({
                     _id: room._id,
                     roomNumber: room.roomNumber,
                     capacity: room.maxBeds,
-                    currentOccupancy: room.occupiedBeds || room.tenants?.length || 0,
+                    currentOccupancy: roomTenants.length,
                     sharingType: room.roomType,
                     basePrice: room.basePrice,
                     status: room.status,
-                    tenants: room.tenants?.map(tenant => ({
-                        _id: tenant.tenantId ? tenant.tenantId._id : tenant._id,
+                    tenants: roomTenants.map(tenant => ({
+                        _id: tenant._id,
                         name: tenant.name,
                         phone: tenant.phone,
                         email: tenant.email,
                         bedId: tenant.bedId,
                         joinDate: tenant.joinDate,
-                        status: tenant.status
-                    })) || [],
+                        status: tenant.status,
+                        vacateDate: tenant.vacateDate
+                    })),
                     propertyId: room.propertyId
                 });
                 return acc;

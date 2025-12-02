@@ -10,7 +10,8 @@ import {
     HomeIcon, 
     Bars3Icon, 
     XMarkIcon,
-    CogIcon
+    CogIcon,
+    CreditCardIcon
 } from '@heroicons/react/24/outline';
 
 const AdminLayout = () => {
@@ -29,6 +30,7 @@ const AdminLayout = () => {
         { name: 'Dashboard', path: '/admin', icon: HomeIcon },
         { name: 'Property Approvals', path: '/admin/properties', icon: BuildingStorefrontIcon },
         { name: 'User Management', path: '/admin/users', icon: UsersIcon },
+        { name: 'Subscriptions', path: '/admin/subscriptions', icon: CreditCardIcon },
         { name: 'System Settings', path: '/admin/settings', icon: CogIcon },
     ];
 

@@ -1,5 +1,6 @@
 // client/src/pages/tenant/TenantProfileForm.jsx
 import React, { useState, useEffect } from 'react';
+import { API_ENDPOINTS } from '../../config/api';
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
 import { 
@@ -32,7 +33,7 @@ const TenantProfileForm = () => {
     const fetchProfile = async () => {
         try {
             const config = { headers: { Authorization: `Bearer ${user.token}` } };
-            const res = await axios.get('http://localhost:5000/api/tenant/profile', config);
+            const res = await axios.get(`${API_ENDPOINTS.TENANT}/profile`, config);
             setProfile({
                 pgName: res.data.pgName || user?.pgName || '',
                 phone: res.data.phone || '',
@@ -53,7 +54,7 @@ const TenantProfileForm = () => {
 
         try {
             const config = { headers: { Authorization: `Bearer ${user.token}` } };
-            const res = await axios.put('http://localhost:5000/api/tenant/profile', profile, config);
+            const res = await axios.put(`${API_ENDPOINTS.TENANT}/profile`, profile, config);
             
             setMessage('Profile updated successfully!');
             setIsCompleted(res.data.profileCompleted);

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_ENDPOINTS } from '../../config/api';
 import { useAuth } from '../../context/AuthContext';
 import { DocumentTextIcon, ArrowDownTrayIcon, PlusIcon } from '@heroicons/react/24/outline';
 import axios from 'axios';
@@ -21,7 +22,7 @@ const OwnerInvoices = () => {
     const fetchInvoices = async () => {
         try {
             const config = { headers: { Authorization: `Bearer ${user.token}` } };
-            const res = await axios.get('http://localhost:5000/api/owner/invoices', config);
+            const res = await axios.get(`${API_ENDPOINTS.OWNER}/invoices`, config);
             setInvoices(res.data);
         } catch (err) {
             console.error('Failed to fetch invoices:', err);
@@ -31,7 +32,7 @@ const OwnerInvoices = () => {
     const fetchTenants = async () => {
         try {
             const config = { headers: { Authorization: `Bearer ${user.token}` } };
-            const res = await axios.get('http://localhost:5000/api/properties/available-tenants', config);
+            const res = await axios.get(`${API_ENDPOINTS.PROPERTIES}/available-tenants`, config);
             setTenants(res.data);
         } catch (err) {
             console.error('Failed to fetch tenants:', err);
@@ -42,7 +43,7 @@ const OwnerInvoices = () => {
         e.preventDefault();
         try {
             const config = { headers: { Authorization: `Bearer ${user.token}` } };
-            await axios.post('http://localhost:5000/api/owner/invoices', formData, config);
+            await axios.post(`${API_ENDPOINTS.OWNER}/invoices`, formData, config);
             setFormData({
                 tenantId: '',
                 month: new Date().toISOString().slice(0, 7),
@@ -65,7 +66,7 @@ const OwnerInvoices = () => {
                 headers: { Authorization: `Bearer ${user.token}` },
                 responseType: 'blob'
             };
-            const res = await axios.get(`http://localhost:5000/api/owner/invoices/${id}/download`, config);
+            const res = await axios.get(`${API_ENDPOINTS.OWNER}/invoices/${id}/download`, config);
             const url = window.URL.createObjectURL(new Blob([res.data]));
             const link = document.createElement('a');
             link.href = url;

@@ -51,6 +51,9 @@ const TenantSchema = new mongoose.Schema({
     moveOutDate: {
         type: Date
     },
+    vacateDate: {
+        type: Date
+    },
     profileCompletedAt: {
         type: Date
     },

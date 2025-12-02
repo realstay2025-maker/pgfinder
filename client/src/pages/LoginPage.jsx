@@ -8,7 +8,8 @@ import Footer from '../components/Footer';
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { user, loading, error, login } = useAuth();
+  const auth = useAuth();
+  const { user, loading, error, login } = auth || {};
   const navigate = useNavigate();
 
   useEffect(() => {

@@ -10,7 +10,16 @@ const API_BASE_URL = API_ENDPOINTS.AUTH;
 
 export const AuthProvider = ({ children }) => {
   // Initialize state from local storage for persistence
-  const [user, setUser] = useState(JSON.parse(localStorage.getItem('userInfo')) || null);
+  const [user, setUser] = useState(() => {
+    try {
+      const stored = localStorage.getItem('userInfo');
+      return stored ? JSON.parse(stored) : null;
+    } catch (error) {
+      console.error('Error parsing user from localStorage:', error);
+      localStorage.removeItem('userInfo');
+      return null;
+    }
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -62,6 +71,12 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     try {
       const { data } = await axios.post(`${API_BASE_URL}/login`, { email, password });
+      
+      console.log('Login response:', data); // Debug log
+      
+      if (!data.token) {
+        throw new Error('No token received from server');
+      }
 
       setUser(data);
       localStorage.setItem('userInfo', JSON.stringify(data));
@@ -69,7 +84,8 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
       return data;
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed');
+      console.error('Login error:', err);
+      setError(err.response?.data?.message || err.message || 'Login failed');
       setLoading(false);
       throw err;
     }
@@ -88,4 +104,10 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};

@@ -16,6 +16,9 @@ export const API_ENDPOINTS = {
   CONTACT: `${API_BASE_URL}/api/contact`,
   BOOKINGS: `${API_BASE_URL}/api/bookings`,
   
+  // Notice endpoints
+  NOTICES: `${API_BASE_URL}/api/notices`,
+  
   // Room endpoints
   ROOMS: `${API_BASE_URL}/api/rooms`,
   
@@ -23,7 +26,16 @@ export const API_ENDPOINTS = {
   TENANT: `${API_BASE_URL}/api/tenant`,
   
   // Admin endpoints
-  ADMIN: `${API_BASE_URL}/api/admin`
+  ADMIN: `${API_BASE_URL}/api/admin`,
+  
+  // Subscription endpoints
+  SUBSCRIPTIONS: `${API_BASE_URL}/api/subscriptions`,
+  
+  // Complaint endpoints
+  COMPLAINTS: `${API_BASE_URL}/api/complaints`,
+  
+  // Payment endpoints
+  PAYMENTS: `${API_BASE_URL}/api/payments`
 };
 
 export default API_BASE_URL;

@@ -1,5 +1,6 @@
 // client/src/pages/owner/RoomManagement.jsx
 import React, { useState, useEffect } from 'react';
+import { API_ENDPOINTS } from '../../config/api';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
@@ -47,8 +48,8 @@ const RoomManagement = () => {
         try {
             const config = { headers: { Authorization: `Bearer ${user.token}` } };
             const [propertyRes, roomsRes] = await Promise.all([
-                axios.get(`http://localhost:5000/api/properties/${propertyId}`, config),
-                axios.get(`http://localhost:5000/api/rooms/property/${propertyId}`, config)
+                axios.get(`${API_ENDPOINTS.PROPERTIES}/${propertyId}`, config),
+                axios.get(`${API_ENDPOINTS.ROOMS}/property/${propertyId}`, config)
             ]);
             setProperty(propertyRes.data);
             setRooms(roomsRes.data);
@@ -71,7 +72,7 @@ const RoomManagement = () => {
         try {
             const config = { headers: { Authorization: `Bearer ${user.token}` } };
             
-            await axios.post(`http://localhost:5000/api/owner/remove-tenant`, {
+            await axios.post(`${API_ENDPOINTS.OWNER}/remove-tenant`, {
                 tenantId: tenantId,
                 propertyId: propertyId,
                 bedId: selectedRoom.tenants.find(t => t._id === tenantId)?.bedId
@@ -100,7 +101,7 @@ const RoomManagement = () => {
             if (editingRoom) updateData.roomNumber = editingRoom.newNumber;
             if (editingPrice) updateData.basePrice = parseInt(editingPrice.newPrice);
             
-            await axios.put(`http://localhost:5000/api/rooms/${selectedRoom._id}`, updateData, config);
+            await axios.put(`${API_ENDPOINTS.ROOMS}/${selectedRoom._id}`, updateData, config);
             
             fetchProperty();
             setEditingRoom(null);
@@ -117,7 +118,7 @@ const RoomManagement = () => {
         try {
             const config = { headers: { Authorization: `Bearer ${user.token}` } };
             
-            await axios.delete(`http://localhost:5000/api/rooms/${selectedRoom._id}`, config);
+            await axios.delete(`${API_ENDPOINTS.ROOMS}/${selectedRoom._id}`, config);
             
             fetchProperty();
             setShowRoomDetails(false);
@@ -135,7 +136,7 @@ const RoomManagement = () => {
         try {
             const config = { headers: { Authorization: `Bearer ${user.token}` } };
             
-            await axios.post('http://localhost:5000/api/rooms', {
+            await axios.post(`${API_ENDPOINTS.ROOMS}`, {
                 propertyId,
                 roomNumber: newRoom.roomNumber,
                 roomType: newRoom.roomType,

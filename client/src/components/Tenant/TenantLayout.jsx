@@ -10,7 +10,8 @@ import {
     DocumentTextIcon,
     ArrowLeftEndOnRectangleIcon,
     Bars3Icon,
-    XMarkIcon
+    XMarkIcon,
+    ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
 
 const TenantLayout = () => {
@@ -31,6 +32,7 @@ const TenantLayout = () => {
         { name: 'Rent & Payments', path: '/tenant/payments', icon: CurrencyRupeeIcon },
         { name: 'Raise an Issue', path: '/tenant/submit-complaint', icon: ExclamationCircleIcon },
         { name: 'Lease & Documents', path: '/tenant/documents', icon: DocumentTextIcon },
+        { name: 'Give Notice', path: '/tenant/give-notice', icon: ExclamationTriangleIcon },
     ];
 
     return (

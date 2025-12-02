@@ -42,7 +42,13 @@ const PaymentSchema = new mongoose.Schema({
     },
     notes: {
         type: String
+    },
+    paymentMonth: {
+        type: String // Format: YYYY-MM
     }
 }, { timestamps: true });
+
+// Compound unique index to prevent duplicate payments for same tenant in same month
+PaymentSchema.index({ tenantId: 1, paymentMonth: 1 }, { unique: true });
 
 module.exports = mongoose.model('Payment', PaymentSchema);
