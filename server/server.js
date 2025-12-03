@@ -32,20 +32,16 @@ const { scheduleSubscriptionReminders } = require('./src/utils/emailReminder');
 
 // const adminMetricsRouter = require('./routes/admin'); // Keep previous routes if you still use them
 
-// Security middleware
-app.use(securityMiddleware);
+// Minimal middleware for health check
+app.use(express.json({ limit: '10mb' }));
 
-// CORS Configuration
-app.use(cors({
-    origin: process.env.CORS_ORIGIN || (process.env.NODE_ENV === 'production' ? false : 'http://localhost:5173'),
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
-}));
-
-// Rate limiting
-app.use('/api/', generalLimiter);
-app.use('/api/auth/', authLimiter);
+// Basic CORS
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    next();
+});
 
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
@@ -67,10 +63,12 @@ app.use('/uploads/tenant-documents', (req, res, next) => {
 }, express.static('uploads/tenant-documents'));
 
 // Connect to MongoDB
+console.log('Initializing MongoDB connection...');
 connectDB().catch(err => {
     console.error('Failed to connect to MongoDB:', err);
     // Don't exit, let health check show the error
 });
+console.log('MongoDB initialization completed, starting server...');
 
 // Simple health check for Render
 app.get('/', (req, res) => {
@@ -126,12 +124,14 @@ process.on('SIGTERM', () => {
 });
 
 // Start Server
+console.log('Starting server on port:', PORT);
 const server = app.listen(PORT, '0.0.0.0', () => {
+    console.log(`✅ Server successfully started on port ${PORT}`);
     logger.info(`🚀 Server running on port ${PORT}`);
     logger.info(`🔒 Security features enabled`);
     logger.info(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
-    
-    // Start subscription reminder scheduler (disabled for faster startup)
-    // scheduleSubscriptionReminders();
-    // logger.info(`📧 Subscription reminder scheduler started`);
+});
+
+server.on('error', (err) => {
+    console.error('❌ Server startup error:', err);
 });
