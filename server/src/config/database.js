@@ -10,17 +10,21 @@ const connectDB = async () => {
             throw new Error('MongoDB URI not found in environment variables');
         }
         
+        console.log('Connecting to MongoDB...');
         const conn = await mongoose.connect(mongoUri, {
             maxPoolSize: 10,
-            serverSelectionTimeoutMS: 5000,
+            serverSelectionTimeoutMS: 30000,
             socketTimeoutMS: 45000,
+            connectTimeoutMS: 30000,
         });
+        console.log('MongoDB connection successful');
 
         // Create indexes for better performance
         await createIndexes();
 
         logger.info(`MongoDB Connected: ${conn.connection.host}`);
     } catch (error) {
+        console.error('MongoDB connection error:', error.message);
         logger.error('Database connection failed:', error);
         // Don't exit in production to allow debugging
         if (process.env.NODE_ENV !== 'production') {
