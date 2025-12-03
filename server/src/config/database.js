@@ -4,6 +4,8 @@ const logger = require('../utils/logger');
 const connectDB = async () => {
     try {
         const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URI;
+        console.log('Attempting MongoDB connection with URI:', mongoUri ? 'URI found' : 'URI missing');
+        
         if (!mongoUri) {
             throw new Error('MongoDB URI not found in environment variables');
         }
@@ -20,7 +22,10 @@ const connectDB = async () => {
         logger.info(`MongoDB Connected: ${conn.connection.host}`);
     } catch (error) {
         logger.error('Database connection failed:', error);
-        process.exit(1);
+        // Don't exit in production to allow debugging
+        if (process.env.NODE_ENV !== 'production') {
+            process.exit(1);
+        }
     }
 };
 

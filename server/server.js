@@ -67,10 +67,18 @@ app.use('/uploads/tenant-documents', (req, res, next) => {
 }, express.static('uploads/tenant-documents'));
 
 // Connect to MongoDB
-connectDB();
+connectDB().catch(err => {
+    console.error('Failed to connect to MongoDB:', err);
+    // Don't exit, let health check show the error
+});
 
-// Root health check
+// Simple health check for Render
 app.get('/', (req, res) => {
+    res.status(200).send('OK');
+});
+
+// Debug route
+app.get('/debug', (req, res) => {
     res.json({ 
         message: 'PG Management API is running', 
         status: 'OK',
