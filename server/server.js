@@ -11,7 +11,7 @@ const { securityMiddleware, generalLimiter, authLimiter } = require('./src/middl
 
 const app = express();
 const PORT = process.env.PORT || 10000;
-const MONGODB_URI = process.env.MONGO_URI || 'mongodb+srv://your_username:your_password@cluster0.xxxxx.mongodb.net/pgmanagement?retryWrites=true&w=majority';
+const MONGODB_URI = process.env.MONGODB_URI || process.env.MONGO_URI || 'mongodb+srv://your_username:your_password@cluster0.xxxxx.mongodb.net/pgmanagement?retryWrites=true&w=majority';
 
 // Import Routes
 const authRoutes = require('./src/routes/auth'); 
@@ -71,7 +71,15 @@ connectDB();
 
 // Root health check
 app.get('/', (req, res) => {
-    res.json({ message: 'PG Management API is running', status: 'OK' });
+    res.json({ 
+        message: 'PG Management API is running', 
+        status: 'OK',
+        env: {
+            hasMongoUri: !!process.env.MONGODB_URI,
+            hasJwtSecret: !!process.env.JWT_SECRET,
+            nodeEnv: process.env.NODE_ENV
+        }
+    });
 });
 
 // Health check routes
