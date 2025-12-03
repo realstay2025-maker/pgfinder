@@ -131,7 +131,7 @@ const server = app.listen(PORT, '0.0.0.0', () => {
     logger.info(`🔒 Security features enabled`);
     logger.info(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
     
-    // Start subscription reminder scheduler
-    scheduleSubscriptionReminders();
-    logger.info(`📧 Subscription reminder scheduler started`);
+    // Start subscription reminder scheduler (disabled for faster startup)
+    // scheduleSubscriptionReminders();
+    // logger.info(`📧 Subscription reminder scheduler started`);
 });

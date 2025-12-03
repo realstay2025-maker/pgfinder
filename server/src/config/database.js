@@ -19,8 +19,13 @@ const connectDB = async () => {
         });
         console.log('MongoDB connection successful');
 
-        // Create indexes for better performance
-        await createIndexes();
+        // Create indexes for better performance (disabled for faster startup)
+        // await createIndexes();
+        
+        // Create indexes in background
+        setTimeout(() => {
+            createIndexes().catch(err => console.log('Index creation failed:', err.message));
+        }, 5000);
 
         logger.info(`MongoDB Connected: ${conn.connection.host}`);
     } catch (error) {
