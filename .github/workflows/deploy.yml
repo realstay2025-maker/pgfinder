@@ -1,13 +1,11 @@
-name: Deploy to Production
+name: Deploy to AWS
 
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
 
 jobs:
-  test:
+  deploy-frontend:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -16,49 +14,39 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-          cache: 'npm'
-          cache-dependency-path: server/package-lock.json
-      
+          
       - name: Install dependencies
         run: |
-          cd server
-          npm ci
-      
-      - name: Run tests
+          cd client
+          npm install
+          
+      - name: Build
         run: |
-          cd server
-          npm test
+          cd client
+          npm run build
+          
+      - name: Deploy to S3
         env:
-          NODE_ENV: test
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          aws s3 sync client/dist/ s3://pg-management-frontend --delete
+          aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_ID }} --paths "/*"
 
-  build:
-    needs: test
+  deploy-backend:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    
     steps:
       - uses: actions/checkout@v3
       
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v0.1.5
         with:
-          node-version: '18'
-          cache: 'npm'
-          cache-dependency-path: client/package-lock.json
-      
-      - name: Build frontend
-        run: |
-          cd client
-          npm ci
-          npm run build
-      
-      - name: Build Docker image
-        run: |
-          docker build -t pg-management:${{ github.sha }} .
-          docker tag pg-management:${{ github.sha }} pg-management:latest
-      
-      - name: Deploy to production
-        if: github.ref == 'refs/heads/main'
-        run: |
-          echo "Deploy to production server"
-          # Add your deployment commands here
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /var/www/pg-management
+            git pull origin main
+            cd server
+            npm install --production
+            pm2 restart all
