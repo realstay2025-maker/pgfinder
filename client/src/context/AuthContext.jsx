@@ -8,6 +8,7 @@ import { API_ENDPOINTS } from '../config/api';
 
 const API_BASE_URL = API_ENDPOINTS.AUTH;
 
+
 export const AuthProvider = ({ children }) => {
   // Initialize state from local storage for persistence
   const [user, setUser] = useState(() => {
@@ -70,7 +71,9 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     setLoading(true);
     try {
-      const { data } = await axios.post(`${API_BASE_URL}/login`, { email, password });
+      const { data } = await axios.post(`${API_BASE_URL.BASE}/login`, { email, password });
+      // const { data } = await axios.post(`${API_BASE_URL.LOGIN}`, { email, password });
+
       
       // console.log('Login response:', data); // Debug log
       
