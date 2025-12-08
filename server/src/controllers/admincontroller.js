@@ -3,6 +3,11 @@ const User = require('../models/User');
 const Property = require('../models/Property');
 const Tenant = require('../models/Tenant');
 const Subscription = require('../models/Subscription');
+const Payment = require('../models/Payment');
+const Room = require('../models/Room');
+const Complaint = require('../models/Complaint');
+const Notice = require('../models/Notice');
+const mongoose = require('mongoose');
 
 // @desc    Get all users
 // @route   GET /api/admin/users
@@ -142,4 +147,167 @@ exports.updateSubscriptionStatus = async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: 'Failed to update subscription', error: error.message });
     }
+};
+
+// @desc    Get system analytics
+// @route   GET /api/admin/analytics
+// @access  Private (Admin)
+exports.getSystemAnalytics = async (req, res) => {
+    try {
+        const { timeframe = 'monthly' } = req.query;
+        
+        // Calculate date range based on timeframe
+        const now = new Date();
+        let startDate;
+        
+        switch (timeframe) {
+            case 'daily':
+                startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000); // Last 30 days
+                break;
+            case 'weekly':
+                startDate = new Date(now.getTime() - 12 * 7 * 24 * 60 * 60 * 1000); // Last 12 weeks
+                break;
+            case 'yearly':
+                startDate = new Date(now.getFullYear() - 3, 0, 1); // Last 3 years
+                break;
+            default: // monthly
+                startDate = new Date(now.getFullYear(), now.getMonth() - 12, 1); // Last 12 months
+        }
+
+        // Get real-time system metrics
+        const [totalProperties, activeUsers, totalRevenue, systemHealth] = await Promise.all([
+            Property.countDocuments({ status: 'approved' }),
+            User.countDocuments({ 
+                role: { $in: ['owner', 'tenant'] },
+                createdAt: { $gte: startDate }
+            }),
+            calculateTotalRevenue(startDate),
+            calculateSystemHealth()
+        ]);
+
+        // Get user growth trends
+        const userGrowth = await User.aggregate([
+            { $match: { createdAt: { $gte: startDate } } },
+            {
+                $group: {
+                    _id: '$role',
+                    count: { $sum: 1 }
+                }
+            }
+        ]);
+
+        // Get revenue breakdown
+        const revenueBreakdown = await calculateRevenueBreakdown(startDate);
+
+        // Get recent activity
+        const recentActivity = await getRecentActivity();
+
+        res.json({
+            overview: {
+                totalProperties,
+                activeUsers,
+                totalRevenue,
+                systemHealth
+            },
+            userGrowth,
+            revenueBreakdown,
+            recentActivity,
+            timeframe
+        });
+    } catch (error) {
+        console.error('Get system analytics error:', error);
+        res.status(500).json({ message: 'Failed to fetch analytics', error: error.message });
+    }
+};
+
+// Helper function to calculate total revenue
+const calculateTotalRevenue = async (startDate) => {
+    const result = await Payment.aggregate([
+        {
+            $match: {
+                createdAt: { $gte: startDate },
+                status: 'paid'
+            }
+        },
+        {
+            $group: {
+                _id: null,
+                total: { $sum: '$amount' }
+            }
+        }
+    ]);
+    
+    return result[0]?.total || 0;
+};
+
+// Helper function to calculate system health
+const calculateSystemHealth = async () => {
+    // Simple health calculation based on active properties vs total properties
+    const totalProperties = await Property.countDocuments();
+    const activeProperties = await Property.countDocuments({ status: 'approved' });
+    
+    if (totalProperties === 0) return 100;
+    return ((activeProperties / totalProperties) * 100).toFixed(1);
+};
+
+// Helper function to calculate revenue breakdown
+const calculateRevenueBreakdown = async (startDate) => {
+    const subscriptionRevenue = await Subscription.aggregate([
+        {
+            $match: {
+                createdAt: { $gte: startDate },
+                status: 'active'
+            }
+        },
+        {
+            $group: {
+                _id: null,
+                total: { $sum: '$amount' }
+            }
+        }
+    ]);
+
+    const paymentRevenue = await Payment.aggregate([
+        {
+            $match: {
+                createdAt: { $gte: startDate },
+                status: 'paid'
+            }
+        },
+        {
+            $group: {
+                _id: null,
+                total: { $sum: { $multiply: ['$amount', 0.05] } } // 5% commission
+            }
+        }
+    ]);
+
+    return {
+        subscriptions: subscriptionRevenue[0]?.total || 0,
+        commission: paymentRevenue[0]?.total || 0,
+        premiumFeatures: 0 // Placeholder for future premium features
+    };
+};
+
+// Helper function to get recent activity
+const getRecentActivity = async () => {
+    const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    
+    const [newProperties, newUsers, resolvedComplaints] = await Promise.all([
+        Property.countDocuments({ createdAt: { $gte: oneWeekAgo } }),
+        User.countDocuments({ 
+            createdAt: { $gte: oneWeekAgo },
+            role: { $in: ['owner', 'tenant'] }
+        }),
+        Complaint.countDocuments({ 
+            updatedAt: { $gte: oneWeekAgo },
+            status: 'resolved'
+        })
+    ]);
+
+    return {
+        newProperties,
+        newUsers,
+        resolvedComplaints
+    };
 };

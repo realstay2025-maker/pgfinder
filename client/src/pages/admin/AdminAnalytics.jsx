@@ -21,10 +21,22 @@ const AdminAnalytics = () => {
       const response = await fetch(`${API_ENDPOINTS.ADMIN}/analytics?timeframe=${timeframe}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch analytics');
+      }
+      
       const data = await response.json();
       setSystemMetrics(data);
     } catch (error) {
       console.error('Failed to fetch system analytics:', error);
+      // Set fallback data structure
+      setSystemMetrics({
+        overview: { totalProperties: 0, activeUsers: 0, totalRevenue: 0, systemHealth: 100 },
+        userGrowth: [],
+        revenueBreakdown: { subscriptions: 0, commission: 0, premiumFeatures: 0 },
+        recentActivity: { newProperties: 0, newUsers: 0, resolvedComplaints: 0 }
+      });
     } finally {
       setLoading(false);
     }
@@ -62,156 +74,161 @@ const AdminAnalytics = () => {
       </div>
 
       {/* System Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-lg">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Total Properties</p>
-              <p className="text-3xl font-bold text-blue-600">1,247</p>
+      {systemMetrics && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Total Properties</p>
+                <p className="text-3xl font-bold text-blue-600">{systemMetrics.overview?.totalProperties?.toLocaleString() || '0'}</p>
+              </div>
+              <BuildingOfficeIcon className="w-12 h-12 text-blue-500" />
             </div>
-            <BuildingOfficeIcon className="w-12 h-12 text-blue-500" />
+            <div className="mt-4 flex items-center text-sm">
+              <ArrowTrendingUpIcon className="w-4 h-4 text-green-500 mr-1" />
+              <span className="text-green-600">Live Data</span>
+              <span className="text-gray-500 ml-2">real-time</span>
+            </div>
           </div>
-          <div className="mt-4 flex items-center text-sm">
-            <ArrowTrendingUpIcon className="w-4 h-4 text-green-500 mr-1" />
-            <span className="text-green-600">+15.3%</span>
-            <span className="text-gray-500 ml-2">from last period</span>
-          </div>
-        </div>
 
-        <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-lg">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Active Users</p>
-              <p className="text-3xl font-bold text-green-600">8,542</p>
+          <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Active Users</p>
+                <p className="text-3xl font-bold text-green-600">{systemMetrics.overview?.activeUsers?.toLocaleString() || '0'}</p>
+              </div>
+              <UserGroupIcon className="w-12 h-12 text-green-500" />
             </div>
-            <UserGroupIcon className="w-12 h-12 text-green-500" />
+            <div className="mt-4 flex items-center text-sm">
+              <ArrowTrendingUpIcon className="w-4 h-4 text-green-500 mr-1" />
+              <span className="text-green-600">Live Data</span>
+              <span className="text-gray-500 ml-2">real-time</span>
+            </div>
           </div>
-          <div className="mt-4 flex items-center text-sm">
-            <ArrowTrendingUpIcon className="w-4 h-4 text-green-500 mr-1" />
-            <span className="text-green-600">+8.7%</span>
-            <span className="text-gray-500 ml-2">from last period</span>
-          </div>
-        </div>
 
-        <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-lg">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Platform Revenue</p>
-              <p className="text-3xl font-bold text-purple-600">₹2.4M</p>
+          <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Platform Revenue</p>
+                <p className="text-3xl font-bold text-purple-600">₹{(systemMetrics.overview?.totalRevenue || 0).toLocaleString()}</p>
+              </div>
+              <CurrencyRupeeIcon className="w-12 h-12 text-purple-500" />
             </div>
-            <CurrencyRupeeIcon className="w-12 h-12 text-purple-500" />
+            <div className="mt-4 flex items-center text-sm">
+              <ArrowTrendingUpIcon className="w-4 h-4 text-green-500 mr-1" />
+              <span className="text-green-600">Live Data</span>
+              <span className="text-gray-500 ml-2">real-time</span>
+            </div>
           </div>
-          <div className="mt-4 flex items-center text-sm">
-            <ArrowTrendingUpIcon className="w-4 h-4 text-green-500 mr-1" />
-            <span className="text-green-600">+22.1%</span>
-            <span className="text-gray-500 ml-2">from last period</span>
-          </div>
-        </div>
 
-        <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-lg">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">System Health</p>
-              <p className="text-3xl font-bold text-green-600">99.8%</p>
+          <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">System Health</p>
+                <p className="text-3xl font-bold text-green-600">{systemMetrics.overview?.systemHealth || '100'}%</p>
+              </div>
+              <ChartBarIcon className="w-12 h-12 text-green-500" />
             </div>
-            <ChartBarIcon className="w-12 h-12 text-green-500" />
-          </div>
-          <div className="mt-4 flex items-center text-sm">
-            <span className="text-green-600">Excellent</span>
-            <span className="text-gray-500 ml-2">uptime</span>
+            <div className="mt-4 flex items-center text-sm">
+              <span className="text-green-600">Live Status</span>
+              <span className="text-gray-500 ml-2">real-time</span>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Detailed Analytics */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* User Growth */}
-        <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-lg">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">User Growth Trends</h3>
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">Property Owners</span>
-              <div className="flex items-center">
-                <div className="w-32 bg-gray-200 rounded-full h-2 mr-3">
-                  <div className="bg-blue-600 h-2 rounded-full" style={{ width: '75%' }}></div>
-                </div>
-                <span className="text-sm font-semibold">2,156</span>
-              </div>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">Tenants</span>
-              <div className="flex items-center">
-                <div className="w-32 bg-gray-200 rounded-full h-2 mr-3">
-                  <div className="bg-green-600 h-2 rounded-full" style={{ width: '85%' }}></div>
-                </div>
-                <span className="text-sm font-semibold">6,386</span>
-              </div>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">Admins</span>
-              <div className="flex items-center">
-                <div className="w-32 bg-gray-200 rounded-full h-2 mr-3">
-                  <div className="bg-purple-600 h-2 rounded-full" style={{ width: '15%' }}></div>
-                </div>
-                <span className="text-sm font-semibold">12</span>
-              </div>
+      {systemMetrics && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* User Growth */}
+          <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-lg">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">User Growth Trends</h3>
+            <div className="space-y-4">
+              {systemMetrics.userGrowth?.map((userType) => {
+                const total = systemMetrics.userGrowth.reduce((sum, u) => sum + u.count, 0);
+                const percentage = total > 0 ? (userType.count / total) * 100 : 0;
+                const roleNames = {
+                  owner: 'Property Owners',
+                  tenant: 'Tenants',
+                  admin: 'Admins'
+                };
+                const colors = {
+                  owner: 'bg-blue-600',
+                  tenant: 'bg-green-600',
+                  admin: 'bg-purple-600'
+                };
+                
+                return (
+                  <div key={userType._id} className="flex justify-between items-center">
+                    <span className="text-gray-600">{roleNames[userType._id] || userType._id}</span>
+                    <div className="flex items-center">
+                      <div className="w-32 bg-gray-200 rounded-full h-2 mr-3">
+                        <div className={`${colors[userType._id] || 'bg-gray-600'} h-2 rounded-full`} style={{ width: `${percentage}%` }}></div>
+                      </div>
+                      <span className="text-sm font-semibold">{userType.count.toLocaleString()}</span>
+                    </div>
+                  </div>
+                );
+              })}
+              {(!systemMetrics.userGrowth || systemMetrics.userGrowth.length === 0) && (
+                <div className="text-center text-gray-500 py-4">No user data available</div>
+              )}
             </div>
           </div>
-        </div>
 
-        {/* Revenue Breakdown */}
-        <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-lg">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Revenue Sources</h3>
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">Subscription Fees</span>
-              <div className="flex items-center">
-                <div className="w-32 bg-gray-200 rounded-full h-2 mr-3">
-                  <div className="bg-blue-600 h-2 rounded-full" style={{ width: '60%' }}></div>
-                </div>
-                <span className="text-sm font-semibold">₹1.44M</span>
-              </div>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">Commission</span>
-              <div className="flex items-center">
-                <div className="w-32 bg-gray-200 rounded-full h-2 mr-3">
-                  <div className="bg-green-600 h-2 rounded-full" style={{ width: '30%' }}></div>
-                </div>
-                <span className="text-sm font-semibold">₹720K</span>
-              </div>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">Premium Features</span>
-              <div className="flex items-center">
-                <div className="w-32 bg-gray-200 rounded-full h-2 mr-3">
-                  <div className="bg-purple-600 h-2 rounded-full" style={{ width: '10%' }}></div>
-                </div>
-                <span className="text-sm font-semibold">₹240K</span>
-              </div>
+          {/* Revenue Breakdown */}
+          <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-lg">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Revenue Sources</h3>
+            <div className="space-y-4">
+              {systemMetrics.revenueBreakdown && (() => {
+                const { subscriptions, commission, premiumFeatures } = systemMetrics.revenueBreakdown;
+                const total = subscriptions + commission + premiumFeatures;
+                const revenueItems = [
+                  { name: 'Subscription Fees', value: subscriptions, color: 'bg-blue-600' },
+                  { name: 'Commission', value: commission, color: 'bg-green-600' },
+                  { name: 'Premium Features', value: premiumFeatures, color: 'bg-purple-600' }
+                ];
+                
+                return revenueItems.map((item) => {
+                  const percentage = total > 0 ? (item.value / total) * 100 : 0;
+                  return (
+                    <div key={item.name} className="flex justify-between items-center">
+                      <span className="text-gray-600">{item.name}</span>
+                      <div className="flex items-center">
+                        <div className="w-32 bg-gray-200 rounded-full h-2 mr-3">
+                          <div className={`${item.color} h-2 rounded-full`} style={{ width: `${percentage}%` }}></div>
+                        </div>
+                        <span className="text-sm font-semibold">₹{item.value.toLocaleString()}</span>
+                      </div>
+                    </div>
+                  );
+                });
+              })()}
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Activity Summary */}
-      <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-lg">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity Summary</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="text-center">
-            <p className="text-3xl font-bold text-blue-600">156</p>
-            <p className="text-gray-600">New Properties This Week</p>
-          </div>
-          <div className="text-center">
-            <p className="text-3xl font-bold text-green-600">342</p>
-            <p className="text-gray-600">New User Registrations</p>
-          </div>
-          <div className="text-center">
-            <p className="text-3xl font-bold text-purple-600">89</p>
-            <p className="text-gray-600">Support Tickets Resolved</p>
+      {systemMetrics && (
+        <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-lg">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity Summary</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="text-center">
+              <p className="text-3xl font-bold text-blue-600">{systemMetrics.recentActivity?.newProperties || 0}</p>
+              <p className="text-gray-600">New Properties This Week</p>
+            </div>
+            <div className="text-center">
+              <p className="text-3xl font-bold text-green-600">{systemMetrics.recentActivity?.newUsers || 0}</p>
+              <p className="text-gray-600">New User Registrations</p>
+            </div>
+            <div className="text-center">
+              <p className="text-3xl font-bold text-purple-600">{systemMetrics.recentActivity?.resolvedComplaints || 0}</p>
+              <p className="text-gray-600">Support Tickets Resolved</p>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

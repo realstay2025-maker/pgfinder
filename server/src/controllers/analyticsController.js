@@ -5,6 +5,7 @@ const Tenant = require('../models/Tenant');
 const Complaint = require('../models/Complaint');
 const Notice = require('../models/Notice');
 const Property = require('../models/Property');
+const mongoose = require('mongoose');
 
 const getDashboardMetrics = async (req, res) => {
   try {
@@ -77,7 +78,7 @@ const getRevenueReport = async (req, res) => {
       },
       {
         $match: {
-          'property.ownerId': mongoose.Types.ObjectId(ownerId),
+          'property.ownerId': new mongoose.Types.ObjectId(ownerId),
           createdAt: {
             $gte: new Date(`${year}-01-01`),
             $lte: new Date(`${year}-12-31`)
@@ -272,6 +273,19 @@ const getCustomReport = async (req, res) => {
     if (filters) {
       Object.keys(filters).forEach(key => {
         pipeline[0].$match[key] = filters[key];
+      });
+    }
+
+    // Add grouping based on requirements
+    if (groupBy) {
+      pipeline.push({
+        $group: {
+          _id: `$${groupBy}`,
+          ...metrics.reduce((acc, metric) => {
+            acc[metric] = { $sum: `$metrics.${metric}` };
+            return acc;
+          }, {})
+        }
       });
     }
 
