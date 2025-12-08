@@ -9,7 +9,7 @@ const {
   logout, 
   getSessions, 
   revokeSession 
-} = require('../controllers/authController');
+} = require('../controllers/authcontroller');
 const { protect } = require('../middleware/auth');
 const sessionManager = require('../middleware/sessionManager');
 const auditLogger = require('../middleware/auditLogger');
