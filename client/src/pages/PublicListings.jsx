@@ -71,12 +71,20 @@ const HeroSection = ({ searchParams, handleChange, handleSearch }) => (
                             />
                         </div>
                     </div>
-                    <button 
-                        type="submit" 
-                        className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-4 rounded-2xl font-semibold text-lg hover:from-blue-600 hover:to-purple-700 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl"
-                    >
-                        🔍 Search Amazing PGs
-                    </button>
+                    <div className="flex gap-4">
+                        <button 
+                            type="submit" 
+                            className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 text-white py-4 rounded-2xl font-semibold text-lg hover:from-blue-600 hover:to-purple-700 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl"
+                        >
+                            🔍 Search Amazing PGs
+                        </button>
+                        <Link 
+                            to="/search"
+                            className="px-8 py-4 bg-white/20 backdrop-blur-sm text-white border-2 border-white/30 rounded-2xl font-semibold text-lg hover:bg-white/30 transition-all duration-200 flex items-center gap-2"
+                        >
+                            Advanced Search
+                        </Link>
+                    </div>
                 </form>
             </div>
         </div>

@@ -45,6 +45,43 @@ const PropertySchema = new mongoose.Schema({
         state: { type: String, required: true },
         zip: { type: String, required: true },
     },
+    location: {
+        type: {
+            type: String,
+            enum: ['Point'],
+            default: 'Point'
+        },
+        coordinates: {
+            type: [Number], // [longitude, latitude]
+            index: '2dsphere'
+        }
+    },
+    amenities: [{
+        type: String,
+        enum: ['wifi', 'ac', 'parking', 'laundry', 'kitchen', 'gym', 'security', 'power_backup', 'water_supply', 'cleaning']
+    }],
+    nearbyServices: {
+        hospitals: [{
+            name: String,
+            distance: Number, // in km
+            type: String
+        }],
+        schools: [{
+            name: String,
+            distance: Number,
+            type: String
+        }],
+        transport: [{
+            name: String,
+            distance: Number,
+            type: String // bus_stop, metro, railway
+        }],
+        shopping: [{
+            name: String,
+            distance: Number,
+            type: String
+        }]
+    },
     images: [{
         type: String, 
     }],

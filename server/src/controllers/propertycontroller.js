@@ -16,15 +16,25 @@ const calculateTotalRooms = (roomTypes) => {
 // @access  Private (PG Owner)
 exports.createProperty = async (req, res) => {
     try {
-        const { title, description, line1, city, state, zip, roomTypes } = req.body;
+        const { title, description, line1, city, state, zip, roomTypes, amenities } = req.body;
         
-        // Parse roomTypes if it's a JSON string
+        // Parse roomTypes and amenities if they're JSON strings
         let parsedRoomTypes = [];
+        let parsedAmenities = [];
+        
         if (roomTypes) {
             try {
                 parsedRoomTypes = typeof roomTypes === 'string' ? JSON.parse(roomTypes) : roomTypes;
             } catch (e) {
                 return res.status(400).json({ error: 'Invalid room types format.' });
+            }
+        }
+        
+        if (amenities) {
+            try {
+                parsedAmenities = typeof amenities === 'string' ? JSON.parse(amenities) : amenities;
+            } catch (e) {
+                return res.status(400).json({ error: 'Invalid amenities format.' });
             }
         }
         
@@ -47,6 +57,7 @@ exports.createProperty = async (req, res) => {
                 state,
                 zip
             },
+            amenities: parsedAmenities,
             roomTypes: parsedRoomTypes,
             status: 'pending'
         });

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline';
 import Header from '../components/Header';
+import Footer from '../components/Footer';
 import usePageTitle from '../hooks/usePageTitle';
 
 const FAQ = () => {
@@ -138,6 +139,8 @@ const FAQ = () => {
                     </Link>
                 </div>
             </div>
+            
+            <Footer />
         </div>
     );
 };

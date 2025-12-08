@@ -104,6 +104,8 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/notices', noticeRoutes);
+app.use('/api/search', require('./src/routes/search'));
+app.use('/api/analytics', require('./src/routes/analytics'));
 
 
 

@@ -16,7 +16,8 @@ import {
     SpeakerWaveIcon,
     WrenchScrewdriverIcon,
     DocumentTextIcon,
-    InboxIcon
+    InboxIcon,
+    ChartBarIcon
 } from '@heroicons/react/24/outline';
 
 const OwnerLayout = () => { // <<< REMOVED { children } prop
@@ -41,6 +42,7 @@ const OwnerLayout = () => { // <<< REMOVED { children } prop
         { name: 'Complaints', path: '/owner/complaints', icon: TicketIcon },
         { name: 'Payments & Dues', path: '/owner/payments', icon: CreditCardIcon },
         { name: 'Notices', path: '/owner/notices', icon: SpeakerWaveIcon },
+        { name: 'Analytics', path: '/owner/analytics', icon: ChartBarIcon },
         // { name: 'Maintenance', path: '/owner/maintenance', icon: WrenchScrewdriverIcon },
         // { name: 'Invoices', path: '/owner/invoices', icon: DocumentTextIcon },
         { name: 'Owner Profile', path: '/owner/profile', icon: UserCircleIcon },

@@ -24,6 +24,7 @@ const Header = () => {
                     <div className="hidden md:flex items-center space-x-1">
                         {[
                             { path: '/', label: 'Home' },
+                            { path: '/search', label: 'Search' },
                             { path: '/about', label: 'About' },
                             { path: '/services', label: 'Services' },
                             { path: '/faq', label: 'FAQ' },
@@ -70,6 +71,7 @@ const Header = () => {
                         <div className="space-y-2">
                             {[
                                 { path: '/', label: 'Home' },
+                                { path: '/search', label: 'Search' },
                                 { path: '/about', label: 'About' },
                                 { path: '/services', label: 'Services' },
                                 { path: '/faq', label: 'FAQ' },

@@ -3,7 +3,17 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 export const API_ENDPOINTS = {
   // Auth endpoints
-  AUTH: `${API_BASE_URL}/api/auth`,
+  AUTH: {
+    BASE: `${API_BASE_URL}/api/auth`,
+    REGISTER: `${API_BASE_URL}/api/auth/register`,
+    LOGIN: `${API_BASE_URL}/api/auth/login`,
+    PROMOTE_ADMIN: `${API_BASE_URL}/api/auth/promote-admin`,
+    CHANGE_PASSWORD: `${API_BASE_URL}/api/auth/change-password`,
+    FORGOT_PASSWORD: `${API_BASE_URL}/api/auth/forgot-password`,
+    RESET_PASSWORD: `${API_BASE_URL}/api/auth/reset-password`,
+    LOGOUT: `${API_BASE_URL}/api/auth/logout`,
+    SESSIONS: `${API_BASE_URL}/api/auth/sessions`
+  },
   
   // Property endpoints
   PROPERTIES_PUBLIC: `${API_BASE_URL}/api/properties/public`,
@@ -35,7 +45,10 @@ export const API_ENDPOINTS = {
   COMPLAINTS: `${API_BASE_URL}/api/complaints`,
   
   // Payment endpoints
-  PAYMENTS: `${API_BASE_URL}/api/payments`
+  PAYMENTS: `${API_BASE_URL}/api/payments`,
+  
+  // Analytics endpoints
+  ANALYTICS: `${API_BASE_URL}/api/analytics`
 };
 
 export default API_BASE_URL;

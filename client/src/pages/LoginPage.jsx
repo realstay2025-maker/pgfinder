@@ -89,12 +89,17 @@ const LoginPage = () => {
           </button>
         </form>
 
-        <p className="mt-4 md:mt-6 text-center text-sm text-gray-600">
-          Not a member?{' '}
-          <Link to="/register" className="font-medium text-primary-dark hover:text-blue-700 transition-colors">
-            Register Here
+        <div className="mt-4 md:mt-6 text-center text-sm text-gray-600">
+          <Link to="/forgot-password" className="font-medium text-blue-600 hover:text-blue-700 transition-colors block mb-3">
+            Forgot your password?
           </Link>
-        </p>
+          <p>
+            Not a member?{' '}
+            <Link to="/register" className="font-medium text-primary-dark hover:text-blue-700 transition-colors">
+              Register Here
+            </Link>
+          </p>
+        </div>
       </div>
       </div>
       <Footer />

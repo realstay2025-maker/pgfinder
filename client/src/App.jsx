@@ -11,6 +11,9 @@ import AboutUs from './pages/AboutUs';
 import ContactUs from './pages/ContactUs';
 import Services from './pages/Services';
 import FAQ from './pages/FAQ';
+import SearchPage from './pages/SearchPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 // Note: ProtectedRoute is assumed to be an obsolete wrapper if AdminProtectedRoute is used
 // import ProtectedRoute from './components/ProtectedRoute'; 
 
@@ -31,6 +34,7 @@ import OwnerMaintenance from './pages/owner/OwnerMaintenance';
 import OwnerInvoices from './pages/owner/OwnerInvoices';
 import OwnerInbox from './pages/owner/OwnerInbox';
 import OwnerProfile from './pages/owner/OwnerProfile';
+import OwnerAnalytics from './pages/owner/OwnerAnalytics';
 
 // --- TENANT IMPORTS ---
 import TenantLayout from './components/Tenant/TenantLayout';
@@ -50,6 +54,7 @@ import AdminPropertyApprovals from './pages/admin/AdminPropertyApprovals';
 import AdminUserManagement from './pages/admin/AdminUserManagement';
 import AdminSettings from './pages/admin/AdminSettings';
 import AdminSubscriptions from './pages/admin/AdminSubscriptions';
+import AdminAnalytics from './pages/admin/AdminAnalytics';
 
 function App() {
   return (
@@ -64,9 +69,12 @@ function App() {
           <Route path="/services" element={<Services />} />
           <Route path="/faq" element={<FAQ />} />
           <Route path="/contact" element={<ContactUs />} />
+          <Route path="/search" element={<SearchPage />} />
           <Route path="/property/:id" element={<PropertyDetails />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
           
           {/* --------------------------------------------------- */}
           {/* 2. PROTECTED ADMIN ROUTES */}
@@ -78,6 +86,7 @@ function App() {
               <Route path="properties" element={<AdminPropertyApprovals />} /> {/* /admin/properties */}
               <Route path="users" element={<AdminUserManagement />} /> {/* /admin/users */}
               <Route path="subscriptions" element={<AdminSubscriptions />} /> {/* /admin/subscriptions */}
+              <Route path="analytics" element={<AdminAnalytics />} /> {/* /admin/analytics */}
               <Route path="settings" element={<AdminSettings />} /> {/* /admin/settings */}
             </Route>
           </Route>
@@ -115,6 +124,7 @@ function App() {
                 <Route path="notices" element={<OwnerNotices />} /> {/* /owner/notices */}
                 <Route path="maintenance" element={<OwnerMaintenance />} /> {/* /owner/maintenance */}
                 <Route path="invoices" element={<OwnerInvoices />} /> {/* /owner/invoices */}
+                <Route path="analytics" element={<OwnerAnalytics />} /> {/* /owner/analytics */}
                 <Route path="profile" element={<OwnerProfile />} /> {/* /owner/profile */}
                 <Route path="edit-property/:id" element={<EditPropertyPage />} /> {/* /owner/edit-property/:id */}
                 <Route path="rooms/:propertyId" element={<RoomManagement />} /> {/* /owner/rooms/:propertyId */}

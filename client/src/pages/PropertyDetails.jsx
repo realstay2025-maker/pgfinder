@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { MapPinIcon, CurrencyRupeeIcon, StarIcon, WifiIcon, HomeIcon, UserGroupIcon, PhoneIcon, ArrowLeftIcon, CheckCircleIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
 import Header from '../components/Header';
+import Footer from '../components/Footer';
 import axios from 'axios';
 import { API_ENDPOINTS } from '../config/api';
 
@@ -333,6 +334,8 @@ const PropertyDetails = () => {
                     </div>
                 </div>
             )}
+            
+            <Footer />
         </div>
     );
 };
