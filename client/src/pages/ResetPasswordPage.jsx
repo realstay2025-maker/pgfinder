@@ -5,6 +5,7 @@ import { API_ENDPOINTS } from '../config/api';
 import usePageTitle from '../hooks/usePageTitle';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import Chatbot from '../components/Chatbot';
 
 const ResetPasswordPage = () => {
   usePageTitle('Reset Password');
@@ -169,6 +170,7 @@ const ResetPasswordPage = () => {
       </div>
       </div>
       <Footer />
+      <Chatbot />
     </div>
   );
 };

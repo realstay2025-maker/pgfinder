@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation, Outlet } from 'react-router-dom'; // <<< ADDED Outlet
 import { useAuth } from '../../context/AuthContext';
+import Chatbot from '../Chatbot';
 import { 
     BuildingStorefrontIcon, 
     PlusCircleIcon, 
@@ -17,7 +18,8 @@ import {
     WrenchScrewdriverIcon,
     DocumentTextIcon,
     InboxIcon,
-    ChartBarIcon
+    ChartBarIcon,
+    CpuChipIcon
 } from '@heroicons/react/24/outline';
 
 const OwnerLayout = () => { // <<< REMOVED { children } prop
@@ -43,6 +45,7 @@ const OwnerLayout = () => { // <<< REMOVED { children } prop
         { name: 'Payments & Dues', path: '/owner/payments', icon: CreditCardIcon },
         { name: 'Notices', path: '/owner/notices', icon: SpeakerWaveIcon },
         { name: 'Analytics', path: '/owner/analytics', icon: ChartBarIcon },
+        { name: 'AI & Automation', path: '/owner/ai', icon: CpuChipIcon },
         // { name: 'Maintenance', path: '/owner/maintenance', icon: WrenchScrewdriverIcon },
         // { name: 'Invoices', path: '/owner/invoices', icon: DocumentTextIcon },
         { name: 'Owner Profile', path: '/owner/profile', icon: UserCircleIcon },
@@ -223,6 +226,7 @@ const OwnerLayout = () => { // <<< REMOVED { children } prop
                     <Outlet /> 
                 </main>
             </div>
+            <Chatbot />
         </div>
     );
 };

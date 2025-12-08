@@ -48,7 +48,10 @@ export const API_ENDPOINTS = {
   PAYMENTS: `${API_BASE_URL}/api/payments`,
   
   // Analytics endpoints
-  ANALYTICS: `${API_BASE_URL}/api/analytics`
+  ANALYTICS: `${API_BASE_URL}/api/analytics`,
+  
+  // AI endpoints
+  AI: `${API_BASE_URL}/api/ai`
 };
 
 export default API_BASE_URL;

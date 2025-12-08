@@ -4,6 +4,7 @@ import { useParams, Link } from 'react-router-dom';
 import { MapPinIcon, CurrencyRupeeIcon, StarIcon, WifiIcon, HomeIcon, UserGroupIcon, PhoneIcon, ArrowLeftIcon, CheckCircleIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import Chatbot from '../components/Chatbot';
 import axios from 'axios';
 import { API_ENDPOINTS } from '../config/api';
 
@@ -336,6 +337,7 @@ const PropertyDetails = () => {
             )}
             
             <Footer />
+            <Chatbot />
         </div>
     );
 };

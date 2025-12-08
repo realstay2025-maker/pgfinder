@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import Chatbot from '../components/Chatbot';
 import usePageTitle from '../hooks/usePageTitle';
 
 const LoginPage = () => {
@@ -103,6 +104,7 @@ const LoginPage = () => {
       </div>
       </div>
       <Footer />
+      <Chatbot />
     </div>
   );
 };

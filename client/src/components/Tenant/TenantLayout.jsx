@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation, Outlet } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import Chatbot from '../Chatbot';
 import { 
     UserIcon, 
     HomeIcon, 
@@ -221,6 +222,7 @@ const TenantLayout = () => {
                     <Outlet />
                 </main>
             </div>
+            <Chatbot />
         </div>
     );
 };

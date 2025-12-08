@@ -35,6 +35,7 @@ import OwnerInvoices from './pages/owner/OwnerInvoices';
 import OwnerInbox from './pages/owner/OwnerInbox';
 import OwnerProfile from './pages/owner/OwnerProfile';
 import OwnerAnalytics from './pages/owner/OwnerAnalytics';
+import OwnerAI from './pages/owner/OwnerAI';
 
 // --- TENANT IMPORTS ---
 import TenantLayout from './components/Tenant/TenantLayout';
@@ -125,6 +126,7 @@ function App() {
                 <Route path="maintenance" element={<OwnerMaintenance />} /> {/* /owner/maintenance */}
                 <Route path="invoices" element={<OwnerInvoices />} /> {/* /owner/invoices */}
                 <Route path="analytics" element={<OwnerAnalytics />} /> {/* /owner/analytics */}
+                <Route path="ai" element={<OwnerAI />} /> {/* /owner/ai */}
                 <Route path="profile" element={<OwnerProfile />} /> {/* /owner/profile */}
                 <Route path="edit-property/:id" element={<EditPropertyPage />} /> {/* /owner/edit-property/:id */}
                 <Route path="rooms/:propertyId" element={<RoomManagement />} /> {/* /owner/rooms/:propertyId */}

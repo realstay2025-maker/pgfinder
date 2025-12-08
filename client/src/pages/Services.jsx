@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { MagnifyingGlassIcon, ShieldCheckIcon, UserGroupIcon, CurrencyRupeeIcon, ClockIcon } from '@heroicons/react/24/outline';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import Chatbot from '../components/Chatbot';
 import usePageTitle from '../hooks/usePageTitle';
 
 const Services = () => {
@@ -93,6 +94,7 @@ const Services = () => {
             </div>
             
             <Footer />
+            <Chatbot />
         </div>
     );
 };

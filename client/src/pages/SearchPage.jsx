@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import usePageTitle from '../hooks/usePageTitle';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import Chatbot from '../components/Chatbot';
 import SearchFilters from '../components/SearchFilters';
 import PropertyMap from '../components/PropertyMap';
 import { API_ENDPOINTS } from '../config/api';
@@ -353,6 +354,7 @@ const SearchPage = () => {
                 </div>
             </div>
             <Footer />
+            <Chatbot />
         </div>
     );
 };

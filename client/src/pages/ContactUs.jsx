@@ -3,6 +3,7 @@ import { API_ENDPOINTS } from '../config/api';
 import { Link } from 'react-router-dom';
 import { PhoneIcon, EnvelopeIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import Header from '../components/Header';
+import Chatbot from '../components/Chatbot';
 import axios from 'axios';
 import usePageTitle from '../hooks/usePageTitle';
 
@@ -139,6 +140,7 @@ const ContactUs = () => {
                     </div>
                 </div>
             </div>
+            <Chatbot />
         </div>
     );
 };
