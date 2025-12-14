@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import { ChartBarIcon, CurrencyRupeeIcon, HomeIcon, UserGroupIcon, ArrowDownTrayIcon, CalendarIcon } from '@heroicons/react/24/outline';
 import { API_ENDPOINTS } from '../../config/api';
 import usePageTitle from '../../hooks/usePageTitle';
 
 const OwnerAnalytics = () => {
   usePageTitle('Analytics & Reports');
+  const { user } = useAuth();
   
   const [metrics, setMetrics] = useState(null);
   const [revenueData, setRevenueData] = useState([]);
@@ -25,7 +27,7 @@ const OwnerAnalytics = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const headers = { Authorization: `Bearer ${token}` };
+      const headers = { Authorization: `Bearer ${user.token}` };
 
       const [dashboardRes, revenueRes, occupancyRes, behaviorRes] = await Promise.all([
         fetch(`${API_ENDPOINTS.ANALYTICS}/dashboard?startDate=${dateRange.start}&endDate=${dateRange.end}`, { headers }),
@@ -56,7 +58,7 @@ const OwnerAnalytics = () => {
     try {
       const token = localStorage.getItem('token');
       const response = await fetch(`${API_ENDPOINTS.ANALYTICS}/export?type=${type}&format=${format}`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${user.token}` }
       });
 
       if (format === 'csv') {

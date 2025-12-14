@@ -28,7 +28,8 @@ const Header = () => {
                             { path: '/about', label: 'About' },
                             { path: '/services', label: 'Services' },
                             { path: '/faq', label: 'FAQ' },
-                            { path: '/contact', label: 'Contact' }
+                            { path: '/contact', label: 'Contact' },
+                            { path: '/login', label: 'Login' }
                         ].map(({ path, label }) => (
                             <Link 
                                 key={path}
@@ -42,18 +43,18 @@ const Header = () => {
                                 {label}
                             </Link>
                         ))}
-                        <Link 
+                        {/* <Link 
                             to="/login" 
                             className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
                         >
                             Login
-                        </Link>
-                        <Link 
+                        </Link> */}
+                        {/* <Link 
                             to="/register" 
                             className="ml-2 px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full text-sm font-medium hover:from-blue-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 shadow-lg"
                         >
                             Post Property
-                        </Link>
+                        </Link> */}
                     </div>
 
                     {/* Mobile Menu Button */}

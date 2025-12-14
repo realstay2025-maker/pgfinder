@@ -53,7 +53,7 @@ export const AuthProvider = ({ children }) => {
   const register = async (name, email, password, role, pgName = '', gender = '') => {
     setLoading(true);
     try {
-      const { data } = await axios.post(`${API_BASE_URL}/register`, { name, email, password, role, pgName, gender });
+      const { data } = await axios.post(`${API_BASE_URL.BASE}/register`, { name, email, password, role, pgName, gender });
       
       setUser(data);
       localStorage.setItem('userInfo', JSON.stringify(data));

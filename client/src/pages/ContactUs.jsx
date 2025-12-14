@@ -100,7 +100,7 @@ const ContactUs = () => {
                                     <PhoneIcon className="w-6 h-6 text-primary-dark mr-4" />
                                     <div>
                                         <div className="font-medium">Phone</div>
-                                        <div className="text-gray-600">+91 98765 43210</div>
+                                        <div className="text-gray-600">+91 8766533029</div>
                                     </div>
                                 </div>
                                 <div className="flex items-center">
@@ -114,7 +114,7 @@ const ContactUs = () => {
                                     <MapPinIcon className="w-6 h-6 text-primary-dark mr-4" />
                                     <div>
                                         <div className="font-medium">Address</div>
-                                        <div className="text-gray-600">123 Business Park, Bangalore, India</div>
+                                        <div className="text-gray-600">Pune, India</div>
                                     </div>
                                 </div>
                             </div>

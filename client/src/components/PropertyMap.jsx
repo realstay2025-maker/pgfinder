@@ -137,11 +137,11 @@ const PropertyMap = ({ properties, center, onLocationSelect }) => {
             <MockMap />
             
             {/* Integration Note */}
-            <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3">
+            {/* <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3">
                 <p className="text-yellow-300 text-sm">
                     <strong>Note:</strong> This is a mock map interface. In production, integrate with Google Maps API for real map functionality.
                 </p>
-            </div>
+            </div> */}
         </div>
     );
 };
