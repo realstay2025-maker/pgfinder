@@ -31,8 +31,14 @@ const RoomManagement = () => {
     const [selectedRoom, setSelectedRoom] = useState(null);
     const [editingRoom, setEditingRoom] = useState(null);
     const [showAssignModal, setShowAssignModal] = useState(false);
-    const [showCreateRoom, setShowCreateRoom] = useState(false);
+    const [showBulkEdit, setShowBulkEdit] = useState(false);
+    const [bulkEditData, setBulkEditData] = useState({
+        selectedRooms: [],
+        roomType: 'double',
+        basePrice: ''
+    });
     const [newRoom, setNewRoom] = useState({
+        floorNumber: 1,
         roomNumber: '',
         roomType: 'single',
         basePrice: '',
@@ -40,6 +46,7 @@ const RoomManagement = () => {
         gender: ''
     });
     const [editingPrice, setEditingPrice] = useState(null);
+    const [showCreateRoom, setShowCreateRoom] = useState(false);
 
     const fetchProperty = async () => {
         if (!user || !propertyId) return;
@@ -59,6 +66,60 @@ const RoomManagement = () => {
             setError(err.response?.data?.error || 'Failed to load property');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleBulkUpdate = async () => {
+        if (bulkEditData.selectedRooms.length === 0) {
+            alert('Please select rooms to update');
+            return;
+        }
+        
+        try {
+            const config = { headers: { Authorization: `Bearer ${user.token}` } };
+            const bedsPerRoom = { single: 1, double: 2, triple: 3, quad: 4 };
+            
+            await axios.put(`${API_ENDPOINTS.ROOMS}/bulk-update`, {
+                roomIds: bulkEditData.selectedRooms,
+                updateData: {
+                    roomType: bulkEditData.roomType,
+                    maxBeds: bedsPerRoom[bulkEditData.roomType],
+                    basePrice: parseInt(bulkEditData.basePrice)
+                }
+            }, config);
+            
+            fetchProperty();
+            setShowBulkEdit(false);
+            setBulkEditData({ selectedRooms: [], roomType: 'double', basePrice: '' });
+        } catch (err) {
+            alert(err.response?.data?.error || 'Failed to update rooms');
+        }
+    };
+
+    const handleCreateRoom = async () => {
+        if (!newRoom.roomNumber || !newRoom.basePrice) {
+            alert('Please fill in all required fields');
+            return;
+        }
+        
+        try {
+            const config = { headers: { Authorization: `Bearer ${user.token}` } };
+            
+            await axios.post(`${API_ENDPOINTS.ROOMS}`, {
+                propertyId,
+                floorNumber: parseInt(newRoom.floorNumber),
+                roomNumber: newRoom.roomNumber,
+                roomType: newRoom.roomType,
+                basePrice: parseInt(newRoom.basePrice),
+                maxBeds: parseInt(newRoom.maxBeds),
+                gender: newRoom.gender
+            }, config);
+            
+            fetchProperty();
+            setShowCreateRoom(false);
+            setNewRoom({ floorNumber: 1, roomNumber: '', roomType: 'single', basePrice: '', maxBeds: 1, gender: '' });
+        } catch (err) {
+            alert(err.response?.data?.error || 'Failed to create room');
         }
     };
 
@@ -128,32 +189,6 @@ const RoomManagement = () => {
         }
     };
 
-    const handleCreateRoom = async () => {
-        if (!newRoom.roomNumber || !newRoom.basePrice) {
-            alert('Please fill in all required fields');
-            return;
-        }
-        
-        try {
-            const config = { headers: { Authorization: `Bearer ${user.token}` } };
-            
-            await axios.post(`${API_ENDPOINTS.ROOMS}`, {
-                propertyId,
-                roomNumber: newRoom.roomNumber,
-                roomType: newRoom.roomType,
-                basePrice: parseInt(newRoom.basePrice),
-                maxBeds: parseInt(newRoom.maxBeds),
-                gender: newRoom.gender
-            }, config);
-            
-            fetchProperty();
-            setShowCreateRoom(false);
-            setNewRoom({ roomNumber: '', roomType: 'single', basePrice: '', maxBeds: 1, gender: '' });
-        } catch (err) {
-            alert(err.response?.data?.error || 'Failed to create room');
-        }
-    };
-
     useEffect(() => {
         fetchProperty();
     }, [user, propertyId]);
@@ -211,13 +246,22 @@ const RoomManagement = () => {
                                 <span className="w-2 h-8 bg-gradient-to-b from-indigo-500 to-purple-600 rounded-full mr-3"></span>
                                 Room Management
                             </h2>
-                            <button
-                                onClick={() => setShowCreateRoom(true)}
-                                className="px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-200 flex items-center shadow-lg"
-                            >
-                                <PlusIcon className="w-5 h-5 mr-2" />
-                                Add Room
-                            </button>
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setShowBulkEdit(true)}
+                                    className="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 flex items-center shadow-lg"
+                                >
+                                    <PencilSquareIcon className="w-5 h-5 mr-2" />
+                                    Bulk Edit
+                                </button>
+                                <button
+                                    onClick={() => setShowCreateRoom(true)}
+                                    className="px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-200 flex items-center shadow-lg"
+                                >
+                                    <PlusIcon className="w-5 h-5 mr-2" />
+                                    Add Room
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -323,6 +367,7 @@ const RoomManagement = () => {
                                                                     }`}
                                                                 >
                                                                     <div className="font-bold">{room.roomNumber}</div>
+                                                                    {room.floorNumber && <div className="text-xs">Floor {room.floorNumber}</div>}
                                                                     <div className="text-xs">{room.currentOccupancy}/{room.capacity}</div>
                                                                     {room.tenants && room.tenants.length > 0 && (
                                                                         <div className="flex -space-x-1 mt-2 justify-center">
@@ -352,7 +397,7 @@ const RoomManagement = () => {
                     </div>
                 </div>
 
-                {/* Assign Tenant Modal */}
+                {/* Modals */}
                 {showAssignModal && (
                     <OnboardTenantModal 
                         onClose={() => setShowAssignModal(false)}
@@ -364,277 +409,92 @@ const RoomManagement = () => {
                     />
                 )}
 
-                {/* Room Details Modal */}
-                {showRoomDetails && selectedRoom && (
+                {/* Bulk Edit Modal */}
+                {showBulkEdit && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                        <div className="bg-white rounded-2xl p-6 w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-100">
+                        <div className="bg-white rounded-2xl p-6 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-100">
                             <div className="flex items-center justify-between mb-6">
-                                <div className="flex items-center space-x-3">
-                                    <div className="p-2 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl">
-                                        <HomeIcon className="w-6 h-6 text-white" />
-                                    </div>
-                                    <h3 className="text-xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
-                                        {editingRoom ? (
-                                            <div className="flex items-center space-x-2">
-                                                <span>Room</span>
-                                                <input
-                                                    type="text"
-                                                    value={editingRoom.newNumber}
-                                                    onChange={(e) => setEditingRoom({ ...editingRoom, newNumber: e.target.value })}
-                                                    className="px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                                />
-                                            </div>
-                                        ) : (
-                                            `Room ${selectedRoom.roomNumber}`
-                                        )}
-                                    </h3>
-                                </div>
+                                <h3 className="text-xl font-bold text-gray-800">Bulk Edit Rooms</h3>
                                 <button
-                                    onClick={() => {
-                                        setShowRoomDetails(false);
-                                        setEditingRoom(null);
-                                        setEditingPrice(null);
-                                    }}
+                                    onClick={() => setShowBulkEdit(false)}
                                     className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition-colors"
                                 >
                                     <XCircleIcon className="w-6 h-6" />
                                 </button>
                             </div>
-                        
-                            <div className="mb-6 p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border border-gray-200">
-                                <div className="text-sm text-gray-600 mb-2">
-                                    {selectedRoom.sharingType} Sharing • 
-                                    {editingPrice ? (
-                                        <span className="inline-flex items-center">
-                                            ₹<input
-                                                type="number"
-                                                value={editingPrice.newPrice}
-                                                onChange={(e) => setEditingPrice({ ...editingPrice, newPrice: e.target.value })}
-                                                className="mx-1 px-2 py-1 border border-gray-300 rounded text-sm w-20 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                            />/bed
-                                        </span>
-                                    ) : (
-                                        <span 
-                                            onClick={() => handleEditPrice(selectedRoom.basePrice)}
-                                            className="cursor-pointer hover:text-indigo-600 hover:underline"
-                                        >
-                                            ₹{selectedRoom.basePrice}/bed
-                                        </span>
-                                    )}
+
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <div>
+                                    <h4 className="font-semibold mb-3">Select Rooms to Update:</h4>
+                                    <div className="max-h-96 overflow-y-auto border rounded-xl p-4">
+                                        <div className="grid grid-cols-4 gap-2">
+                                            {rooms.map(room => (
+                                                <label key={room._id} className="flex items-center space-x-2 p-2 border rounded cursor-pointer hover:bg-gray-50">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={bulkEditData.selectedRooms.includes(room._id)}
+                                                        onChange={(e) => {
+                                                            const selected = e.target.checked
+                                                                ? [...bulkEditData.selectedRooms, room._id]
+                                                                : bulkEditData.selectedRooms.filter(id => id !== room._id);
+                                                            setBulkEditData({ ...bulkEditData, selectedRooms: selected });
+                                                        }}
+                                                    />
+                                                    <span className="text-sm">{room.roomNumber}</span>
+                                                </label>
+                                            ))}
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="text-sm font-medium">
-                                    Occupancy: {selectedRoom.currentOccupancy}/{selectedRoom.capacity} beds
+
+                                <div>
+                                    <h4 className="font-semibold mb-3">Update Settings:</h4>
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">Room Type</label>
+                                            <select
+                                                value={bulkEditData.roomType}
+                                                onChange={(e) => setBulkEditData({ ...bulkEditData, roomType: e.target.value })}
+                                                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                            >
+                                                <option value="single">Single Sharing</option>
+                                                <option value="double">Double Sharing</option>
+                                                <option value="triple">Triple Sharing</option>
+                                                <option value="quad">Quad Sharing</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">Base Price (₹/month per bed)</label>
+                                            <input
+                                                type="number"
+                                                value={bulkEditData.basePrice}
+                                                onChange={(e) => setBulkEditData({ ...bulkEditData, basePrice: e.target.value })}
+                                                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                                placeholder="Enter price"
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        
-                            {/* Room Actions */}
-                            {!editingRoom && !editingPrice ? (
-                                <div className="flex space-x-3 mb-6">
+
+                            <div className="flex justify-between items-center mt-6 pt-4 border-t">
+                                <p className="text-sm text-gray-600">
+                                    {bulkEditData.selectedRooms.length} rooms selected
+                                </p>
+                                <div className="flex space-x-3">
                                     <button
-                                        onClick={() => handleEditRoom(selectedRoom.roomNumber)}
-                                        className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl text-sm hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-lg flex items-center justify-center"
+                                        onClick={handleBulkUpdate}
+                                        className="px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-lg"
                                     >
-                                        <PencilSquareIcon className="w-4 h-4 mr-2" />
-                                        Edit Room
+                                        Update Selected Rooms
                                     </button>
                                     <button
-                                        onClick={handleDeleteRoom}
-                                        className="flex-1 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl text-sm hover:from-red-600 hover:to-red-700 transition-all duration-200 shadow-lg"
-                                    >
-                                        Delete Room
-                                    </button>
-                                </div>
-                            ) : (
-                                <div className="flex space-x-3 mb-6">
-                                    <button
-                                        onClick={handleSaveRoomEdit}
-                                        className="flex-1 px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl text-sm hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-lg"
-                                    >
-                                        Save Changes
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            setEditingRoom(null);
-                                            setEditingPrice(null);
-                                        }}
-                                        className="flex-1 px-4 py-2 bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-xl text-sm hover:from-gray-600 hover:to-gray-700 transition-all duration-200 shadow-lg"
+                                        onClick={() => setShowBulkEdit(false)}
+                                        className="px-6 py-3 bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-xl hover:from-gray-600 hover:to-gray-700 transition-all duration-200 shadow-lg"
                                     >
                                         Cancel
                                     </button>
                                 </div>
-                            )}
-                        
-                            {/* Current Tenants */}
-                            {selectedRoom.tenants && selectedRoom.tenants.length > 0 ? (
-                                <div className="mb-6">
-                                    <h4 className="font-semibold mb-3 text-gray-800">Current Tenants:</h4>
-                                    <div className="space-y-3">
-                                        {selectedRoom.tenants.map((tenant) => (
-                                            <div key={tenant._id} className="flex items-center justify-between bg-gradient-to-r from-gray-50 to-gray-100 p-4 rounded-xl border border-gray-200">
-                                                <div className="flex items-center space-x-3">
-                                                    <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold shadow-lg">
-                                                        {tenant.name.charAt(0)}
-                                                    </div>
-                                                    <div>
-                                                        <div className="font-medium text-gray-800">{tenant.name}</div>
-                                                        {tenant.phone && <div className="text-sm text-gray-500">{tenant.phone}</div>}
-                                                        <div className="text-xs text-gray-400">Bed: {tenant.bedId}</div>
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-center space-x-2">
-                                                    {tenant.phone && (
-                                                        <button
-                                                            onClick={() => window.open(`tel:${tenant.phone}`, '_self')}
-                                                            className="p-2 text-green-500 hover:text-green-700 hover:bg-green-50 rounded-xl transition-colors"
-                                                        >
-                                                            <PhoneIcon className="w-4 h-4" />
-                                                        </button>
-                                                    )}
-                                                    <button
-                                                        onClick={() => handleRemoveTenant(tenant._id)}
-                                                        className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-xl transition-colors"
-                                                    >
-                                                        <TrashIcon className="w-4 h-4" />
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="mb-6 p-6 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl text-center text-gray-500 border border-gray-200">
-                                    <ClipboardDocumentListIcon className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-                                    No tenants in this room
-                                </div>
-                            )}
-
-                            {/* Add Tenant Button */}
-                            {(() => {
-                                const hasSpace = selectedRoom.currentOccupancy < selectedRoom.capacity;
-                                
-                                return hasSpace ? (
-                                    <button
-                                        onClick={() => {
-                                            setShowRoomDetails(false);
-                                            setShowAssignModal(true);
-                                        }}
-                                        className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-3 px-4 rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-200 flex items-center justify-center shadow-lg"
-                                    >
-                                        <PlusIcon className="w-5 h-5 mr-2" />
-                                        Add Tenant to This Room
-                                    </button>
-                                ) : (
-                                    <div className="text-center text-gray-500 py-3 bg-gray-100 rounded-xl">
-                                        Room is at full capacity
-                                    </div>
-                                );
-                            })()}
-                        </div>
-                    </div>
-                )}
-
-                {/* Create Room Modal */}
-                {showCreateRoom && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                        <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4 shadow-2xl border border-gray-100">
-                            <div className="flex items-center justify-between mb-6">
-                                <div className="flex items-center space-x-3">
-                                    <div className="p-2 bg-gradient-to-r from-green-500 to-green-600 rounded-xl">
-                                        <PlusIcon className="w-6 h-6 text-white" />
-                                    </div>
-                                    <h3 className="text-xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
-                                        Add New Room
-                                    </h3>
-                                </div>
-                                <button
-                                    onClick={() => setShowCreateRoom(false)}
-                                    className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition-colors"
-                                >
-                                    <XCircleIcon className="w-6 h-6" />
-                                </button>
-                            </div>
-
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Room Number</label>
-                                    <input
-                                        type="text"
-                                        value={newRoom.roomNumber}
-                                        onChange={(e) => setNewRoom({ ...newRoom, roomNumber: e.target.value })}
-                                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                        placeholder="e.g., 101, A1, etc."
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Sharing Type</label>
-                                    <select
-                                        value={newRoom.roomType}
-                                        onChange={(e) => {
-                                            const type = e.target.value;
-                                            const beds = type === 'single' ? 1 : type === 'double' ? 2 : type === 'triple' ? 3 : 4;
-                                            setNewRoom({ ...newRoom, roomType: type, maxBeds: beds });
-                                        }}
-                                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                    >
-                                        <option value="single">Single Sharing</option>
-                                        <option value="double">Double Sharing</option>
-                                        <option value="triple">Triple Sharing</option>
-                                        <option value="quad">Quad Sharing</option>
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Gender</label>
-                                    <select
-                                        value={newRoom.gender || ''}
-                                        onChange={(e) => setNewRoom({ ...newRoom, gender: e.target.value })}
-                                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                        required
-                                    >
-                                        <option value="">Select Gender</option>
-                                        <option value="male">Male</option>
-                                        <option value="female">Female</option>
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Max Beds</label>
-                                    <input
-                                        type="number"
-                                        value={newRoom.maxBeds}
-                                        onChange={(e) => setNewRoom({ ...newRoom, maxBeds: parseInt(e.target.value) })}
-                                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                        min="1"
-                                        max="10"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Base Price (₹/month per bed)</label>
-                                    <input
-                                        type="number"
-                                        value={newRoom.basePrice}
-                                        onChange={(e) => setNewRoom({ ...newRoom, basePrice: e.target.value })}
-                                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                        placeholder="Enter price"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="flex space-x-3 mt-6">
-                                <button
-                                    onClick={handleCreateRoom}
-                                    className="flex-1 px-4 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-lg"
-                                >
-                                    Create Room
-                                </button>
-                                <button
-                                    onClick={() => setShowCreateRoom(false)}
-                                    className="flex-1 px-4 py-3 bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-xl hover:from-gray-600 hover:to-gray-700 transition-all duration-200 shadow-lg"
-                                >
-                                    Cancel
-                                </button>
                             </div>
                         </div>
                     </div>

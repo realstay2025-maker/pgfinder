@@ -39,6 +39,21 @@ const PropertySchema = new mongoose.Schema({
         type: String,
         trim: true,
     },
+    pgType: {
+        type: String,
+        enum: ['boys', 'girls', 'unisex'],
+        required: true,
+    },
+    floorCount: {
+        type: Number,
+        required: true,
+        min: 1,
+    },
+    roomsPerFloor: {
+        type: Number,
+        required: true,
+        min: 1,
+    },
     address: {
         line1: { type: String, required: true },
         city: { type: String, required: true },

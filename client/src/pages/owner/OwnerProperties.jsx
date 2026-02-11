@@ -189,6 +189,16 @@ const OwnerProperties = () => {
                                         <MapPinIcon className='w-4 h-4 mr-1' /> 
                                         {property.address?.line1}, {property.address?.city}, {property.address?.state}
                                     </p>
+                                    {property.pgType && (
+                                        <p className="text-sm text-gray-600 mb-2">
+                                            <span className="font-medium">PG Type:</span> {property.pgType === 'boys' ? 'Boys Only' : property.pgType === 'girls' ? 'Girls Only' : 'Unisex'}
+                                        </p>
+                                    )}
+                                    {property.floorCount && property.roomsPerFloor && (
+                                        <p className="text-sm text-gray-600 mb-2">
+                                            <span className="font-medium">Structure:</span> {property.floorCount} floors, {property.roomsPerFloor} rooms per floor
+                                        </p>
+                                    )}
                                     <p className="text-md font-semibold text-primary-dark mt-2">
                                         Starting Rent: ₹{property.roomTypes && property.roomTypes.length > 0 
                                             ? Math.min(...property.roomTypes.map(r => Number(r.basePrice || Infinity))) 

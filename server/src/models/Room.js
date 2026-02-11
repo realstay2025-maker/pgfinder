@@ -7,6 +7,11 @@ const RoomSchema = new mongoose.Schema({
         ref: 'Property',
         required: true
     },
+    floorNumber: {
+        type: Number,
+        required: true,
+        min: 1
+    },
     roomNumber: {
         type: String,
         required: true
@@ -51,6 +56,6 @@ const RoomSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Index for efficient queries
-RoomSchema.index({ propertyId: 1, roomNumber: 1 });
+RoomSchema.index({ propertyId: 1, floorNumber: 1, roomNumber: 1 });
 
 module.exports = mongoose.model('Room', RoomSchema);

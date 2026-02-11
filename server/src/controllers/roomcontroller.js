@@ -7,7 +7,7 @@ const Property = require('../models/Property');
 // @route   POST /api/rooms
 // @access  Private (PG Owner)
 exports.createRoom = async (req, res) => {
-    const { propertyId, roomNumber, roomType, basePrice, maxBeds, gender } = req.body;
+    const { propertyId, floorNumber, roomNumber, roomType, basePrice, maxBeds, gender } = req.body;
 
     // 1. Validation
     if (!propertyId) {
@@ -30,6 +30,7 @@ exports.createRoom = async (req, res) => {
         // 3. Create Room
         const room = new Room({
             propertyId,
+            floorNumber: floorNumber || 1,
             roomNumber,
             roomType,
             basePrice,
@@ -71,7 +72,7 @@ exports.getRoomsByProperty = async (req, res) => {
             return res.status(403).json({ message: 'Not authorized to view rooms for this property' });
         }
 
-        const rooms = await Room.find({ propertyId }).sort({ roomNumber: 1 });
+        const rooms = await Room.find({ propertyId }).sort({ floorNumber: 1, roomNumber: 1 });
         res.json(rooms);
 
     } catch (err) {
@@ -151,10 +152,11 @@ exports.getRoomsForProperty = async (req, res) => {
         }
         
         // Get all rooms for this property with populated tenant data
-        const rooms = await Room.find({ propertyId }).populate('tenants.tenantId', 'name email phone').sort({ roomNumber: 1 });
+        const rooms = await Room.find({ propertyId }).populate('tenants.tenantId', 'name email phone').sort({ floorNumber: 1, roomNumber: 1 });
         
         const roomsData = rooms.map(room => ({
             _id: room._id,
+            floorNumber: room.floorNumber,
             roomNumber: room.roomNumber,
             capacity: room.maxBeds,
             currentOccupancy: room.occupiedBeds,
@@ -215,6 +217,38 @@ exports.updateRoom = async (req, res) => {
         }
         console.error('Update room error:', err);
         res.status(500).json({ error: 'Failed to update room' });
+    }
+};
+
+// @desc    Bulk update rooms
+// @route   PUT /api/rooms/bulk-update
+// @access  Private (PG Owner)
+exports.bulkUpdateRooms = async (req, res) => {
+    try {
+        const { roomIds, updateData } = req.body;
+        const ownerId = req.user._id;
+        
+        // Verify all rooms belong to owner's properties
+        const rooms = await Room.find({ _id: { $in: roomIds } }).populate('propertyId');
+        
+        for (const room of rooms) {
+            if (room.propertyId.ownerId.toString() !== ownerId.toString()) {
+                return res.status(403).json({ error: 'Unauthorized' });
+            }
+        }
+        
+        // Update all rooms
+        await Room.updateMany(
+            { _id: { $in: roomIds } },
+            updateData,
+            { runValidators: true }
+        );
+        
+        res.json({ message: 'Rooms updated successfully' });
+        
+    } catch (err) {
+        console.error('Bulk update rooms error:', err);
+        res.status(500).json({ error: 'Failed to update rooms' });
     }
 };
 

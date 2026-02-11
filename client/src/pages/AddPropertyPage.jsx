@@ -16,6 +16,9 @@ const AddPropertyPage = () => {
   const [propertyData, setPropertyData] = useState({
     title: '',
     description: '',
+    pgType: 'boys',
+    floorCount: '',
+    roomsPerFloor: '',
     address: { line1: '', city: '', state: '', zip: '' },
     amenities: [],
     roomTypes: [ 
@@ -108,11 +111,19 @@ const AddPropertyPage = () => {
         
         formData.append('title', propertyData.title);
         formData.append('description', propertyData.description);
+        formData.append('pgType', propertyData.pgType);
+        formData.append('floorCount', propertyData.floorCount);
+        formData.append('roomsPerFloor', propertyData.roomsPerFloor);
         formData.append('line1', propertyData.address.line1);
         formData.append('city', propertyData.address.city);
         formData.append('state', propertyData.address.state);
         formData.append('zip', propertyData.address.zip);
-        formData.append('roomTypes', JSON.stringify(propertyData.roomTypes)); 
+        formData.append('roomTypes', JSON.stringify(propertyData.roomTypes.map(rt => ({
+            type: rt.type,
+            basePrice: rt.basePrice,
+            availableCount: rt.selectedRooms ? rt.selectedRooms.length.toString() : rt.availableCount,
+            selectedRooms: rt.selectedRooms || []
+        }))));  
         formData.append('amenities', JSON.stringify(propertyData.amenities));
 
         images.forEach((file) => {
@@ -127,14 +138,15 @@ const AddPropertyPage = () => {
                 },
             };
 
-            await axios.post(`${API_ENDPOINTS.PROPERTIES}/add`, formData, config);
+            await axios.post(`${API_ENDPOINTS.PROPERTIES}`, formData, config);
             
             setSuccess('Property submitted successfully! Redirecting...');
             setTimeout(() => navigate('/owner/properties'), 1500);
 
         } catch (err) {
             console.error('Property submission error:', err);
-            setError(err.response?.data?.error || 'Failed to submit property. Check console for details.');
+            console.error('Error details:', err.response?.data);
+            setError(err.response?.data?.error || err.response?.data?.message || 'Failed to submit property. Check console for details.');
         } finally {
             setLoading(false);
         }
@@ -164,6 +176,24 @@ const AddPropertyPage = () => {
                 <div>
                   <label htmlFor="description" className={labelClass}>Description / Amenities Overview</label>
                   <textarea id="description" name="description" value={propertyData.description} onChange={handleInputChange} rows="3" className={inputClass}></textarea>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label htmlFor="pgType" className={labelClass}>PG Type <span className="text-custom-red">*</span></label>
+                    <select id="pgType" name="pgType" value={propertyData.pgType} onChange={handleInputChange} className={inputClass} required>
+                      <option value="boys">Boys Only</option>
+                      <option value="girls">Girls Only</option>
+                      <option value="unisex">Unisex</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label htmlFor="floorCount" className={labelClass}>Number of Floors <span className="text-custom-red">*</span></label>
+                    <input type="number" id="floorCount" name="floorCount" value={propertyData.floorCount} onChange={handleInputChange} className={inputClass} min="1" required />
+                  </div>
+                  <div>
+                    <label htmlFor="roomsPerFloor" className={labelClass}>Rooms per Floor <span className="text-custom-red">*</span></label>
+                    <input type="number" id="roomsPerFloor" name="roomsPerFloor" value={propertyData.roomsPerFloor} onChange={handleInputChange} className={inputClass} min="1" required />
+                  </div>
                 </div>
             </div>
           </section>
@@ -200,7 +230,7 @@ const AddPropertyPage = () => {
 
             <div className='space-y-4'>
                 {propertyData.roomTypes.map((roomType, index) => (
-                    <div key={index} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 bg-gray-50 p-3 md:p-4 rounded-lg border">
+                    <div key={index} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4 bg-gray-50 p-3 md:p-4 rounded-lg border">
                         <div>
                             <label className={labelClass}>Sharing Type</label>
                             <select
@@ -227,13 +257,66 @@ const AddPropertyPage = () => {
                         </div>
 
                         <div>
-                            <label className={labelClass}>Rooms of this Type</label>
+                            <label className={labelClass}>Room Numbers</label>
+                            <div className="relative">
+                                <div 
+                                    className={`${inputClass} cursor-pointer flex items-center justify-between`}
+                                    onClick={() => handleRoomTypeChange(index, 'showDropdown', !roomType.showDropdown)}
+                                >
+                                    <span className="text-sm">
+                                        {roomType.selectedRooms?.length > 0 
+                                            ? `${roomType.selectedRooms.length} rooms selected`
+                                            : 'Select rooms'
+                                        }
+                                    </span>
+                                    <span>▼</span>
+                                </div>
+                                {roomType.showDropdown && (
+                                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto">
+                                        {propertyData.floorCount && propertyData.roomsPerFloor && 
+                                            Array.from({length: parseInt(propertyData.floorCount)}, (_, floor) => 
+                                                Array.from({length: parseInt(propertyData.roomsPerFloor)}, (_, room) => {
+                                                    const roomNumber = `${floor + 1}${(room + 1).toString().padStart(2, '0')}`;
+                                                    const isSelected = roomType.selectedRooms?.includes(roomNumber);
+                                                    return (
+                                                        <div 
+                                                            key={roomNumber}
+                                                            className={`p-2 cursor-pointer hover:bg-gray-100 flex items-center ${
+                                                                isSelected ? 'bg-blue-50 text-blue-700' : ''
+                                                            }`}
+                                                            onClick={() => {
+                                                                const current = roomType.selectedRooms || [];
+                                                                const updated = isSelected 
+                                                                    ? current.filter(r => r !== roomNumber)
+                                                                    : [...current, roomNumber];
+                                                                handleRoomTypeChange(index, 'selectedRooms', updated);
+                                                                handleRoomTypeChange(index, 'availableCount', updated.length.toString());
+                                                            }}
+                                                        >
+                                                            <input 
+                                                                type="checkbox" 
+                                                                checked={isSelected}
+                                                                onChange={() => {}}
+                                                                className="mr-2"
+                                                            />
+                                                            Room {roomNumber}
+                                                        </div>
+                                                    );
+                                                })
+                                            ).flat()
+                                        }
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className={labelClass}>Room Count</label>
                             <input
                                 type="text"
-                                placeholder="e.g., 5"
-                                value={roomType.availableCount}
-                                onChange={(e) => handleRoomTypeChange(index, 'availableCount', e.target.value.replace(/[^0-9]/g, ''))}
-                                className={inputClass}
+                                value={roomType.selectedRooms ? roomType.selectedRooms.length : roomType.availableCount || '0'}
+                                className={`${inputClass} bg-gray-100`}
+                                readOnly
                             />
                         </div>
 

@@ -16,7 +16,7 @@ const calculateTotalRooms = (roomTypes) => {
 // @access  Private (PG Owner)
 exports.createProperty = async (req, res) => {
     try {
-        const { title, description, line1, city, state, zip, roomTypes, amenities } = req.body;
+        const { title, description, pgType, floorCount, roomsPerFloor, line1, city, state, zip, roomTypes, amenities } = req.body;
         
         // Parse roomTypes and amenities if they're JSON strings
         let parsedRoomTypes = [];
@@ -49,6 +49,9 @@ exports.createProperty = async (req, res) => {
             ownerId: req.user._id,
             title,
             description,
+            pgType,
+            floorCount: parseInt(floorCount),
+            roomsPerFloor: parseInt(roomsPerFloor),
             images: imagePaths,
             basePrice,
             address: {
@@ -64,25 +67,50 @@ exports.createProperty = async (req, res) => {
 
         await newProperty.save();
         
-        // Create rooms in separate collection
+        // Create rooms in separate collection with floor information
         const roomsToCreate = [];
-        parsedRoomTypes.forEach(roomType => {
-            const bedsPerRoom = { single: 1, double: 2, triple: 3, quad: 4 };
-            const roomCount = roomType.availableCount || 0;
-            const maxBeds = bedsPerRoom[roomType.type] || 1;
+        const bedsPerRoom = { single: 1, double: 2, triple: 3, quad: 4 };
+        
+        // Process each room type configuration
+        parsedRoomTypes.forEach(roomTypeConfig => {
+            const maxBeds = bedsPerRoom[roomTypeConfig.type] || 2;
+            const gender = pgType === 'unisex' ? 'male' : (pgType === 'boys' ? 'male' : 'female');
             
-            for (let i = 1; i <= roomCount; i++) {
-                const roomNumber = `${roomType.type.charAt(0).toUpperCase()}${i.toString().padStart(2, '0')}`;
-                roomsToCreate.push({
-                    propertyId: newProperty._id,
-                    roomNumber,
-                    roomType: roomType.type,
-                    maxBeds,
-                    basePrice: roomType.basePrice,
-                    occupiedBeds: 0,
-                    status: 'empty',
-                    tenants: []
+            if (roomTypeConfig.selectedRooms && roomTypeConfig.selectedRooms.length > 0) {
+                // Create rooms for specifically selected room numbers
+                roomTypeConfig.selectedRooms.forEach(roomNumber => {
+                    const floorNumber = Math.floor(parseInt(roomNumber) / 100);
+                    roomsToCreate.push({
+                        propertyId: newProperty._id,
+                        floorNumber,
+                        roomNumber,
+                        roomType: roomTypeConfig.type,
+                        gender,
+                        maxBeds,
+                        basePrice: parseInt(roomTypeConfig.basePrice) || 0,
+                        occupiedBeds: 0,
+                        status: 'empty',
+                        tenants: []
+                    });
                 });
+            } else {
+                // Fallback: create rooms based on availableCount (for backward compatibility)
+                const roomCount = parseInt(roomTypeConfig.availableCount) || 0;
+                for (let i = 1; i <= roomCount; i++) {
+                    const roomNumber = `${1}${i.toString().padStart(2, '0')}`; // Default to floor 1
+                    roomsToCreate.push({
+                        propertyId: newProperty._id,
+                        floorNumber: 1,
+                        roomNumber,
+                        roomType: roomTypeConfig.type,
+                        gender,
+                        maxBeds,
+                        basePrice: parseInt(roomTypeConfig.basePrice) || 0,
+                        occupiedBeds: 0,
+                        status: 'empty',
+                        tenants: []
+                    });
+                }
             }
         });
         

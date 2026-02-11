@@ -7,7 +7,8 @@ const {
     getAvailableRoomsForOwner,
     getRoomsForProperty,
     updateRoom,
-    deleteRoom
+    deleteRoom,
+    bulkUpdateRooms
 } = require('../controllers/roomcontroller'); 
 
 const router = express.Router();
@@ -24,6 +25,9 @@ router.get('/property/:propertyId', ownerProtect, getRoomsForProperty);
 
 // 3. POST route for creating rooms
 router.post('/', ownerProtect, createRoom);
+
+// 3.1. PUT route for bulk updating rooms
+router.put('/bulk-update', ownerProtect, bulkUpdateRooms);
 
 // 4. Update room
 router.put('/:roomId', ownerProtect, updateRoom);
