@@ -62,17 +62,17 @@ const AdminDashboardHome = () => {
         <div className="p-6">
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-3xl font-bold text-gray-800 flex items-center">
-                    <ChartBarIcon className="w-8 h-8 mr-2 text-purple-600" />
+                    <ChartBarIcon className="w-8 h-8 mr-2 text-indigo-600" />
                     Admin Dashboard
                 </h1>
                 <p className="text-gray-600">Welcome back, {user?.name}!</p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500">
+                <div className="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-indigo-600 hover:shadow-xl hover:-translate-y-1 transition-all duration-200">
                     <div className="flex items-center">
-                        <div className="p-3 rounded-full bg-blue-100">
-                            <UsersIcon className="w-6 h-6 text-blue-600" />
+                        <div className="p-3 rounded-full bg-indigo-100">
+                            <UsersIcon className="w-6 h-6 text-indigo-600" />
                         </div>
                         <div className="ml-4">
                             <p className="text-sm font-medium text-gray-600">Total Users</p>
@@ -81,10 +81,10 @@ const AdminDashboardHome = () => {
                     </div>
                 </div>
 
-                <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-500">
+                <div className="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-violet-600 hover:shadow-xl hover:-translate-y-1 transition-all duration-200">
                     <div className="flex items-center">
-                        <div className="p-3 rounded-full bg-green-100">
-                            <BuildingStorefrontIcon className="w-6 h-6 text-green-600" />
+                        <div className="p-3 rounded-full bg-violet-100">
+                            <BuildingStorefrontIcon className="w-6 h-6 text-violet-600" />
                         </div>
                         <div className="ml-4">
                             <p className="text-sm font-medium text-gray-600">Total Properties</p>
@@ -93,10 +93,10 @@ const AdminDashboardHome = () => {
                     </div>
                 </div>
 
-                <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-yellow-500">
+                <div className="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-cyan-500 hover:shadow-xl hover:-translate-y-1 transition-all duration-200">
                     <div className="flex items-center">
-                        <div className="p-3 rounded-full bg-yellow-100">
-                            <ClockIcon className="w-6 h-6 text-yellow-600" />
+                        <div className="p-3 rounded-full bg-cyan-100">
+                            <ClockIcon className="w-6 h-6 text-cyan-600" />
                         </div>
                         <div className="ml-4">
                             <p className="text-sm font-medium text-gray-600">Pending Approvals</p>
@@ -105,10 +105,10 @@ const AdminDashboardHome = () => {
                     </div>
                 </div>
 
-                <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-purple-500">
+                <div className="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-rose-500 hover:shadow-xl hover:-translate-y-1 transition-all duration-200">
                     <div className="flex items-center">
-                        <div className="p-3 rounded-full bg-purple-100">
-                            <CheckCircleIcon className="w-6 h-6 text-purple-600" />
+                        <div className="p-3 rounded-full bg-rose-100">
+                            <CheckCircleIcon className="w-6 h-6 text-rose-600" />
                         </div>
                         <div className="ml-4">
                             <p className="text-sm font-medium text-gray-600">Active Tenants</p>
@@ -124,10 +124,10 @@ const AdminDashboardHome = () => {
                     <div className="space-y-3">
                         {stats?.usersByRole?.map((roleData) => {
                             const roleColors = {
-                                admin: 'bg-purple-100 text-purple-800',
-                                super_admin: 'bg-red-100 text-red-800',
-                                pg_owner: 'bg-blue-100 text-blue-800',
-                                tenant: 'bg-green-100 text-green-800'
+                                admin: 'bg-indigo-100 text-indigo-800',
+                                super_admin: 'bg-violet-100 text-violet-800',
+                                pg_owner: 'bg-cyan-100 text-cyan-800',
+                                tenant: 'bg-rose-100 text-rose-800'
                             };
                             return (
                                 <div key={roleData._id} className="flex justify-between items-center">
@@ -144,15 +144,15 @@ const AdminDashboardHome = () => {
                 <div className="bg-white rounded-xl shadow-lg p-6">
                     <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
                     <div className="space-y-3">
-                        <Link to="/admin/properties" className="block p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
+                        <Link to="/admin/properties" className="block p-3 rounded-lg border border-gray-200 hover:bg-indigo-50 hover:border-indigo-300 transition-all duration-200">
                             <div className="flex items-center">
-                                <BuildingStorefrontIcon className="w-5 h-5 text-purple-600 mr-3" />
+                                <BuildingStorefrontIcon className="w-5 h-5 text-indigo-600 mr-3" />
                                 <span className="font-medium">Review Property Approvals</span>
                             </div>
                         </Link>
-                        <Link to="/admin/users" className="block p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
+                        <Link to="/admin/users" className="block p-3 rounded-lg border border-gray-200 hover:bg-violet-50 hover:border-violet-300 transition-all duration-200">
                             <div className="flex items-center">
-                                <UsersIcon className="w-5 h-5 text-purple-600 mr-3" />
+                                <UsersIcon className="w-5 h-5 text-violet-600 mr-3" />
                                 <span className="font-medium">Manage Users</span>
                             </div>
                         </Link>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ChartBarIcon, BuildingOfficeIcon, UserGroupIcon, CurrencyRupeeIcon, ArrowTrendingUpIcon } from '@heroicons/react/24/outline';
 import { API_ENDPOINTS } from '../../config/api';
+import { THEME } from '../../config/theme';
 import usePageTitle from '../../hooks/usePageTitle';
 
 const AdminAnalytics = () => {
@@ -45,7 +46,7 @@ const AdminAnalytics = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{borderColor: THEME.primary.base}}></div>
       </div>
     );
   }
@@ -55,7 +56,7 @@ const AdminAnalytics = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold" style={{color: THEME.primary.base}}>
             System Analytics
           </h1>
           <p className="text-gray-600 mt-2">Platform-wide performance metrics and insights</p>
@@ -64,7 +65,8 @@ const AdminAnalytics = () => {
         <select
           value={timeframe}
           onChange={(e) => setTimeframe(e.target.value)}
-          className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+          className="px-4 py-2 border rounded-lg transition-all"
+          style={{borderColor: THEME.primary.base, outline: 'none', '--tw-ring-color': `${THEME.primary.base}40`}}
         >
           <option value="daily">Daily</option>
           <option value="weekly">Weekly</option>
@@ -76,13 +78,13 @@ const AdminAnalytics = () => {
       {/* System Overview Cards */}
       {systemMetrics && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-lg">
+          <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-lg hover:shadow-xl transition-shadow">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Properties</p>
-                <p className="text-3xl font-bold text-blue-600">{systemMetrics.overview?.totalProperties?.toLocaleString() || '0'}</p>
+                <p className="text-3xl font-bold" style={{color: THEME.primary.base}}>{systemMetrics.overview?.totalProperties?.toLocaleString() || '0'}</p>
               </div>
-              <BuildingOfficeIcon className="w-12 h-12 text-blue-500" />
+              <BuildingOfficeIcon className="w-12 h-12" style={{color: THEME.primary.base}} />
             </div>
             <div className="mt-4 flex items-center text-sm">
               <ArrowTrendingUpIcon className="w-4 h-4 text-green-500 mr-1" />
@@ -91,46 +93,46 @@ const AdminAnalytics = () => {
             </div>
           </div>
 
-          <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-lg">
+          <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-lg hover:shadow-xl transition-shadow">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Active Users</p>
-                <p className="text-3xl font-bold text-green-600">{systemMetrics.overview?.activeUsers?.toLocaleString() || '0'}</p>
+                <p className="text-3xl font-bold" style={{color: THEME.secondary.base}}>{systemMetrics.overview?.activeUsers?.toLocaleString() || '0'}</p>
               </div>
-              <UserGroupIcon className="w-12 h-12 text-green-500" />
+              <UserGroupIcon className="w-12 h-12" style={{color: THEME.secondary.base}} />
             </div>
             <div className="mt-4 flex items-center text-sm">
-              <ArrowTrendingUpIcon className="w-4 h-4 text-green-500 mr-1" />
-              <span className="text-green-600">Live Data</span>
+              <ArrowTrendingUpIcon className="w-4 h-4 mr-1" style={{color: THEME.secondary.base}} />
+              <span style={{color: THEME.secondary.base}}>Live Data</span>
               <span className="text-gray-500 ml-2">real-time</span>
             </div>
           </div>
 
-          <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-lg">
+          <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-lg hover:shadow-xl transition-shadow">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Platform Revenue</p>
-                <p className="text-3xl font-bold text-purple-600">₹{(systemMetrics.overview?.totalRevenue || 0).toLocaleString()}</p>
+                <p className="text-3xl font-bold" style={{color: '#0f766e'}}>₹{(systemMetrics.overview?.totalRevenue || 0).toLocaleString()}</p>
               </div>
-              <CurrencyRupeeIcon className="w-12 h-12 text-purple-500" />
+              <CurrencyRupeeIcon className="w-12 h-12" style={{color: '#0f766e'}} />
             </div>
             <div className="mt-4 flex items-center text-sm">
-              <ArrowTrendingUpIcon className="w-4 h-4 text-green-500 mr-1" />
-              <span className="text-green-600">Live Data</span>
+              <ArrowTrendingUpIcon className="w-4 h-4 mr-1" style={{color: THEME.secondary.base}} />
+              <span style={{color: THEME.secondary.base}}>Live Data</span>
               <span className="text-gray-500 ml-2">real-time</span>
             </div>
           </div>
 
-          <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-lg">
+          <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-lg hover:shadow-xl transition-shadow">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">System Health</p>
-                <p className="text-3xl font-bold text-green-600">{systemMetrics.overview?.systemHealth || '100'}%</p>
+                <p className="text-3xl font-bold" style={{color: THEME.primary.base}}>{systemMetrics.overview?.systemHealth || '100'}%</p>
               </div>
-              <ChartBarIcon className="w-12 h-12 text-green-500" />
+              <ChartBarIcon className="w-12 h-12" style={{color: THEME.primary.base}} />
             </div>
             <div className="mt-4 flex items-center text-sm">
-              <span className="text-green-600">Live Status</span>
+              <span style={{color: THEME.primary.base}}>Live Status</span>
               <span className="text-gray-500 ml-2">real-time</span>
             </div>
           </div>

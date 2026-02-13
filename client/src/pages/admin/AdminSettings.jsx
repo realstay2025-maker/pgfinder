@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { CogIcon, BellIcon, ShieldCheckIcon, CircleStackIcon, UserIcon, KeyIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../../context/AuthContext';
-import ChangePassword from '../../components/ChangePassword';
+import { Link } from 'react-router-dom';
+import { THEME } from '../../config/theme';
 import axios from 'axios';
 import { API_ENDPOINTS } from '../../config/api';
 
@@ -56,11 +57,11 @@ const AdminSettings = () => {
     };
 
     return (
-        <div className="p-6 bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen">
+        <div className="p-6 min-h-screen" style={{backgroundColor: '#f8fafc'}}>
             {/* Header */}
             <div className="mb-8">
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-2 flex items-center">
-                    <CogIcon className="w-10 h-10 mr-3 text-purple-600" />
+                <h1 className="text-4xl font-bold mb-2 flex items-center" style={{color: THEME.primary.base}}>
+                    <CogIcon className="w-10 h-10 mr-3" style={{color: THEME.secondary.base}} />
                     Admin Settings
                 </h1>
                 <p className="text-gray-600 text-lg">Configure system settings and preferences</p>
@@ -234,7 +235,18 @@ const AdminSettings = () => {
                 </div>
 
                 {/* Change Password */}
-                <ChangePassword />
+                <div className="bg-white/80 backdrop-blur-lg rounded-3xl p-8 border border-white/20 shadow-lg flex flex-col justify-center">
+                    <div className="text-center">
+                        <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <KeyIcon className="w-8 h-8 text-white" />
+                        </div>
+                        <h2 className="text-2xl font-bold text-gray-900 mb-2">Change Password</h2>
+                        <p className="text-gray-600 mb-6">Update your password to keep your account secure</p>
+                        <Link to="/admin/change-password" className="inline-block bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-3 rounded-2xl font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-200">
+                            Change Password
+                        </Link>
+                    </div>
+                </div>
             </div>
 
             {/* Save Button */}

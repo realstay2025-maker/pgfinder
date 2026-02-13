@@ -305,7 +305,7 @@ const OwnerAI = () => {
               <button
                 onClick={fetchMaintenancePrediction}
                 disabled={loading || !selectedProperty}
-                className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 disabled:opacity-50 transition-colors"
+                className="bg-violet-600 text-white px-4 py-2 rounded-lg hover:bg-violet-700 disabled:opacity-50 transition-colors"
               >
                 {loading ? 'Analyzing...' : 'Predict Maintenance'}
               </button>

@@ -48,7 +48,7 @@ const AdminSubscriptions = () => {
     if (loading) {
         return (
             <div className="flex items-center justify-center h-64">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+                <div className="animate-spin rounded-full h-12 w-12" style={{borderBottom: `2px solid ${THEME.primary.base}`}}></div>
             </div>
         );
     }
@@ -56,8 +56,8 @@ const AdminSubscriptions = () => {
     return (
         <div className="p-6">
             <div className="mb-8">
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-2 flex items-center">
-                    <CreditCardIcon className="w-8 h-8 mr-3 text-purple-600" />
+                <h1 className="text-3xl font-bold mb-2 flex items-center" style={{color: THEME.primary.base}}>
+                    <CreditCardIcon className="w-8 h-8 mr-3" style={{color: THEME.secondary.base}} />
                     Subscription Management
                 </h1>
                 <p className="text-gray-600">Manage PG owner subscriptions and billing</p>

@@ -1,227 +1,191 @@
-// client/src/components/TenantLayout.jsx
-import React, { useState } from 'react';
-import { Link, useLocation, Outlet } from 'react-router-dom';
+// client/src/components/Tenant/TenantLayout.jsx
+// UPDATED: Unified Blue Professional Theme with Onboarding Gate
+import React, { useState, useEffect } from 'react';
+import { Outlet, useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import axios from 'axios';
 import Chatbot from '../Chatbot';
 import { 
     UserIcon, 
     HomeIcon, 
     CurrencyRupeeIcon, 
-    ExclamationCircleIcon, 
     DocumentTextIcon,
-    ArrowLeftEndOnRectangleIcon,
-    Bars3Icon,
-    XMarkIcon,
-    ExclamationTriangleIcon
+    ExclamationTriangleIcon,
+    CheckCircleIcon,
+    LockClosedIcon
 } from '@heroicons/react/24/outline';
+import DashboardNavigation from '../DashboardNavigation';
+import { THEME } from '../../config/theme';
+import { API_ENDPOINTS } from '../../config/api';
 
 const TenantLayout = () => {
     const { logout, user } = useAuth();
     const location = useLocation();
-    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [isProfileCompleted, setIsProfileCompleted] = useState(null);
+    const [checkingProfile, setCheckingProfile] = useState(true);
+    const [hasPgAssignment, setHasPgAssignment] = useState(false);
     
-    const isActive = (path) => {
-        if (path === '/tenant') {
-            return location.pathname === '/tenant';
+    // Check if profile is completed
+    useEffect(() => {
+        checkProfileStatus();
+    }, []);
+
+    const checkProfileStatus = async () => {
+        try {
+            const config = { headers: { Authorization: `Bearer ${user.token}` } };
+            const res = await axios.get(`${API_ENDPOINTS.TENANT}/profile`, config);
+            
+            const completed = res.data.profileCompleted;
+            const pgName = res.data.pgName;
+            
+            setIsProfileCompleted(completed);
+            setHasPgAssignment(!!pgName);
+            
+            console.log('Profile Status:', { completed, pgName });
+        } catch (err) {
+            console.error('Failed to check profile:', err);
+            // If tenant not found, they need to complete profile
+            setIsProfileCompleted(false);
+            setHasPgAssignment(false);
+        } finally {
+            setCheckingProfile(false);
         }
-        return location.pathname.startsWith(path);
-    }
+    };
     
     const navItems = [
         { name: 'Dashboard', path: '/tenant', icon: HomeIcon },
         { name: 'Profile', path: '/tenant/profile', icon: UserIcon },
         { name: 'Rent & Payments', path: '/tenant/payments', icon: CurrencyRupeeIcon },
-        { name: 'Raise an Issue', path: '/tenant/submit-complaint', icon: ExclamationCircleIcon },
         { name: 'Lease & Documents', path: '/tenant/documents', icon: DocumentTextIcon },
         { name: 'Give Notice', path: '/tenant/give-notice', icon: ExclamationTriangleIcon },
     ];
 
-    return (
-        <div className="flex h-screen bg-gray-100">
-            {/* Mobile sidebar overlay */}
-            {sidebarOpen && (
-                <div className="fixed inset-0 z-40 md:hidden">
-                    <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)} />
-                    <div className="relative flex-1 flex flex-col max-w-xs w-full bg-gradient-to-b from-emerald-900 via-teal-900 to-cyan-900 text-white">
-                        <div className="absolute top-0 right-0 -mr-12 pt-2">
-                            <button
-                                className="ml-1 flex items-center justify-center h-10 w-10 rounded-full bg-white/20 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
-                                onClick={() => setSidebarOpen(false)}
-                            >
-                                <XMarkIcon className="h-6 w-6 text-white" />
-                            </button>
-                        </div>
-                        <div className="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
-                            <div className="px-4">
-                                <div className="flex items-center space-x-3 mb-6">
-                                    <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-lg flex items-center justify-center">
-                                        <UserIcon className="w-5 h-5 text-white" />
-                                    </div>
-                                    <div>
-                                        <h2 className="text-lg font-bold">Tenant</h2>
-                                        <p className="text-xs text-emerald-200">Portal</p>
-                                    </div>
-                                </div>
-                                <nav className="space-y-1">
-                                    {navItems.map(item => {
-                                        const Icon = item.icon;
-                                        const active = isActive(item.path);
-                                        return (
-                                            <Link 
-                                                key={item.name} 
-                                                to={item.path} 
-                                                className={`flex items-center px-3 py-2 rounded-lg transition-all duration-200 ${
-                                                    active 
-                                                        ? 'bg-gradient-to-r from-emerald-500 to-teal-600 shadow-lg' 
-                                                        : 'hover:bg-white/10'
-                                                }`}
-                                                onClick={() => setSidebarOpen(false)}
-                                            >
-                                                <div className={`p-1 rounded mr-3 ${
-                                                    active ? 'bg-white/20' : 'bg-white/10'
-                                                }`}>
-                                                    <Icon className="w-4 h-4" />
-                                                </div>
-                                                <span className="text-sm font-medium">{item.name}</span>
-                                            </Link>
-                                        );
-                                    })}
-                                </nav>
-                            </div>
-                        </div>
-                        <div className="flex-shrink-0 p-4 border-t border-white/10">
-                            <div className="bg-white/10 rounded-lg p-3 mb-3">
-                                <div className="flex items-center space-x-2">
-                                    <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center text-white font-bold text-xs">
-                                        {user?.name?.charAt(0) || 'T'}
-                                    </div>
-                                    <div>
-                                        <p className="text-xs font-medium text-white">{user?.name || 'Tenant'}</p>
-                                        <p className="text-xs text-emerald-200">Resident</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <button 
-                                onClick={logout} 
-                                className="w-full flex items-center justify-center py-2 px-3 rounded-lg bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 transition-all duration-200 shadow-lg"
-                            >
-                                <ArrowLeftEndOnRectangleIcon className="w-4 h-4 mr-2" /> 
-                                <span className="text-sm font-medium">Logout</span>
-                            </button>
-                        </div>
-                    </div>
+    // Show loading state
+    if (checkingProfile) {
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+                <div className="text-center">
+                    <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+                    <p className="text-gray-600 font-medium">Loading your profile...</p>
                 </div>
-            )}
-            
-            {/* Desktop Sidebar */}
-            <div className="w-72 bg-gradient-to-b from-emerald-900 via-teal-900 to-cyan-900 text-white flex flex-col hidden md:flex flex-shrink-0 relative overflow-hidden">
-                {/* Background Pattern */}
-                <div className="absolute inset-0 opacity-10">
-                    <div className="absolute top-0 left-0 w-40 h-40 bg-white rounded-full -translate-x-20 -translate-y-20"></div>
-                    <div className="absolute bottom-0 right-0 w-32 h-32 bg-white rounded-full translate-x-16 translate-y-16"></div>
-                </div>
-                
-                {/* Header */}
-                <div className="relative z-10 p-6">
-                    <div className="flex items-center space-x-3 mb-2">
-                        <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl flex items-center justify-center shadow-lg">
-                            <UserIcon className="w-6 h-6 text-white" />
-                        </div>
-                        <div>
-                            <h2 className="text-xl font-bold bg-gradient-to-r from-white to-emerald-100 bg-clip-text text-transparent">
-                                Tenant Portal
-                            </h2>
-                            <p className="text-xs text-emerald-200">Resident Dashboard</p>
-                        </div>
-                    </div>
-                </div>
-                
-                {/* Navigation */}
-                <nav className="flex-grow px-4 relative z-10">
-                    <div className="space-y-1">
-                        {navItems.map(item => {
-                            const Icon = item.icon;
-                            const active = isActive(item.path);
-                            return (
-                                <Link 
-                                    key={item.name} 
-                                    to={item.path} 
-                                    className={`group flex items-center px-4 py-3 rounded-xl transition-all duration-200 relative overflow-hidden ${
-                                        active 
-                                            ? 'bg-gradient-to-r from-emerald-500 to-teal-600 shadow-lg transform scale-105' 
-                                            : 'hover:bg-white/10 hover:translate-x-1'
-                                    }`}
-                                >
-                                    {active && (
-                                        <div className="absolute inset-0 bg-gradient-to-r from-emerald-400/20 to-teal-500/20 rounded-xl"></div>
-                                    )}
-                                    <div className={`p-2 rounded-lg mr-3 transition-all duration-200 ${
-                                        active 
-                                            ? 'bg-white/20 shadow-md' 
-                                            : 'bg-white/10 group-hover:bg-white/20'
-                                    }`}>
-                                        <Icon className="w-5 h-5" />
-                                    </div>
-                                    <span className={`font-medium text-sm relative z-10 ${
-                                        active ? 'text-white' : 'text-emerald-100 group-hover:text-white'
-                                    }`}>
-                                        {item.name}
-                                    </span>
-                                    {active && (
-                                        <div className="ml-auto w-2 h-2 bg-white rounded-full shadow-lg"></div>
-                                    )}
-                                </Link>
-                            );
-                        })}
-                    </div>
-                </nav>
-                
-                {/* User Profile & Logout */}
-                <div className="relative z-10 p-4 border-t border-white/10">
-                    {/* User Info Card */}
-                    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 mb-4">
-                        <div className="flex items-center space-x-3">
-                            <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                                {user?.name?.charAt(0) || 'T'}
+            </div>
+        );
+    }
+
+    // Gate: If profile NOT completed, only show profile page
+    if (!isProfileCompleted) {
+        // Redirect to profile if they try to go elsewhere
+        if (!location.pathname.includes('/profile')) {
+            return <Navigate to="/tenant/profile" replace />;
+        }
+
+        return (
+            <div className="flex h-screen bg-gray-100">
+                {/* Show limited navigation */}
+                <div className="hidden md:flex md:flex-col w-72 bg-gradient-to-b from-indigo-900 via-indigo-800 to-violet-900 text-white fixed left-0 top-0 h-full" style={{ paddingTop: '64px' }}>
+                    <div className="p-6 border-b border-white/10">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
+                                <UserIcon className="w-6 h-6 text-white" />
                             </div>
-                            <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-white truncate">{user?.name || 'Tenant'}</p>
-                                <p className="text-xs text-emerald-200">Resident</p>
+                            <div>
+                                <div className="font-bold">Onboarding</div>
+                                <div className="text-xs text-indigo-200">Complete Setup</div>
                             </div>
                         </div>
                     </div>
                     
-                    {/* Logout Button */}
-                    <button 
-                        onClick={logout} 
-                        className="w-full flex items-center justify-center py-3 px-4 rounded-xl bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 group"
-                    >
-                        <ArrowLeftEndOnRectangleIcon className="w-5 h-5 mr-2 group-hover:rotate-12 transition-transform duration-200" /> 
-                        <span className="font-medium">Logout</span>
-                    </button>
-                </div>
-            </div>
-            
-            {/* Main Content */}
-            <div className="flex-1 flex flex-col overflow-hidden">
-                {/* Mobile header */}
-                <div className="md:hidden bg-white shadow-sm border-b border-gray-200">
-                    <div className="px-4 py-3 flex items-center justify-between">
-                        <button
-                            className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-emerald-500"
-                            onClick={() => setSidebarOpen(true)}
-                        >
-                            <Bars3Icon className="h-6 w-6" />
+                    <div className="flex-1 p-4">
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/20">
+                                <CheckCircleIcon className="w-5 h-5 text-green-400 flex-shrink-0" />
+                                <span className="text-sm font-medium">Complete Profile</span>
+                            </div>
+                            <div className="flex items-center gap-3 px-4 py-3 rounded-xl opacity-50">
+                                <LockClosedIcon className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                                <span className="text-sm font-medium">Dashboard</span>
+                            </div>
+                            <div className="flex items-center gap-3 px-4 py-3 rounded-xl opacity-50">
+                                <LockClosedIcon className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                                <span className="text-sm font-medium">Payments</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="p-4 border-t border-white/10">
+                        <button onClick={logout} className="w-full py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-medium transition-colors">
+                            Logout
                         </button>
-                        <h1 className="text-lg font-semibold text-gray-900">Tenant Portal</h1>
-                        <div className="w-8" />
                     </div>
                 </div>
-                
-                <main className="flex-1 overflow-y-auto p-4 md:p-6">
-                    <Outlet />
+
+                {/* Main Content - Only Profile Form */}
+                <div className="flex-1 flex flex-col overflow-hidden pt-16 md:pl-72">
+                    {/* Top Header */}
+                    <div className="bg-white shadow-sm px-4 sm:px-6 lg:px-8 py-3 md:hidden flex items-center justify-between">
+                        <h1 className="text-lg font-bold text-gray-900">Onboarding</h1>
+                        <button onClick={logout} className="text-red-600 hover:text-red-700 font-medium text-sm">
+                            Logout
+                        </button>
+                    </div>
+
+                    {/* Onboarding Banner */}
+                    <div className="bg-blue-50 border-b border-blue-200 px-4 sm:px-6 lg:px-8 py-4">
+                        <div className="flex items-start gap-3">
+                            <CheckCircleIcon className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                            <div>
+                                <h3 className="font-semibold text-blue-900">Welcome to PG Finder!</h3>
+                                <p className="text-sm text-blue-800 mt-1">
+                                    Please complete your profile to get started. Once done, you'll be taken to room assignment where the PG owner will verify your details.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Page Content */}
+                    <main className="flex-1 overflow-y-auto bg-gray-50">
+                        <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+                            <Outlet />
+                        </div>
+                    </main>
+                </div>
+
+                <Chatbot />
+            </div>
+        );
+    }
+
+    // Normal layout when profile IS completed
+    return (
+        <div className="flex h-screen bg-gray-100">
+            <DashboardNavigation 
+                roleDisplayName="Tenant Portal"
+                logoIcon={UserIcon}
+                navItems={navItems}
+                onLogout={logout}
+                changePasswordPath="/tenant/change-password"
+            />
+
+            <div className="flex-1 flex flex-col overflow-hidden pt-16 md:pl-72">
+                {/* Profile Completion Banner */}
+                {hasPgAssignment && (
+                    <div className="bg-green-50 border-b border-green-200 px-4 sm:px-6 lg:px-8 py-3">
+                        <div className="flex items-center gap-2">
+                            <CheckCircleIcon className="w-5 h-5 text-green-600 flex-shrink-0" />
+                            <p className="text-sm text-green-800 font-medium">
+                                ✓ Your profile is complete and verified. Pending room assignment from owner.
+                            </p>
+                        </div>
+                    </div>
+                )}
+
+                <main className="flex-1 overflow-y-auto bg-gray-50">
+                    <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+                        <Outlet />
+                    </div>
                 </main>
             </div>
+
             <Chatbot />
         </div>
     );

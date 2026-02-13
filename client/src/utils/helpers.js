@@ -10,9 +10,9 @@ export const getStatusColor = (status, type = 'default') => {
     revoked: 'text-gray-600 bg-gray-100',
     paid: 'text-green-600 bg-green-100',
     overdue: 'text-red-600 bg-red-100',
-    partial: 'text-orange-600 bg-orange-100',
+    partial: 'text-violet-600 bg-violet-100',
     active: 'text-green-600 bg-green-100',
-    notice: 'text-orange-600 bg-orange-100'
+    notice: 'text-violet-600 bg-violet-100'
   };
   
   return statusColors[status] || 'text-gray-600 bg-gray-100';

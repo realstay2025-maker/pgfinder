@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { API_ENDPOINTS } from '../../config/api';
+import { THEME } from '../../config/theme';
 import { 
     HomeModernIcon, 
     UsersIcon, 
@@ -233,7 +234,7 @@ const OwnerTenantRoster = () => {
         }
         if (status === 'vacant') {
             return (
-                <span className="inline-flex items-center px-3 py-2 text-xs font-bold rounded-full bg-gradient-to-r from-amber-400 to-orange-500 text-white shadow-lg">
+                <span className="inline-flex items-center px-3 py-2 text-xs font-bold rounded-full bg-gradient-to-r from-indigo-400 to-violet-500 text-white shadow-lg">
                     <span className="w-2 h-2 bg-white rounded-full mr-2"></span>
                     Available
                 </span>
@@ -298,10 +299,10 @@ const OwnerTenantRoster = () => {
             <div className="p-6">
             
             {error && (
-                <div className="p-4 mb-4 text-red-700 border-l-4 border-red-500 bg-red-100/50 rounded-md shadow-sm">
+                <div className="p-4 mb-4 border-l-4 rounded-md shadow-sm" style={{borderColor: '#ef4444', backgroundColor: '#ef444415', color: '#991b1b'}}>
                     <p className="font-semibold">Data Load Error:</p>
                     <p className="text-sm">{error}</p>
-                    <button onClick={fetchRoster} className="mt-2 text-xs text-blue-800 hover:underline">Click to Reload</button>
+                    <button onClick={fetchRoster} className="mt-2 text-xs hover:underline" style={{color: THEME.primary.base}}>Click to Reload</button>
                 </div>
             )}
 
@@ -309,16 +310,16 @@ const OwnerTenantRoster = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                     {/* Total Beds Card */}
                     <div className="group hover:scale-105 transition-all duration-300">
-                        <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-6 rounded-2xl shadow-xl text-white relative overflow-hidden">
+                        <div className="bg-gradient-to-br p-6 rounded-2xl shadow-xl text-white relative overflow-hidden" style={{background: `linear-gradient(135deg, ${THEME.primary.base}, #0891b2)`}}>
                             <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -mr-10 -mt-10"></div>
                             <div className="relative z-10">
                                 <div className="flex items-center justify-between mb-4">
-                                    <HomeModernIcon className="w-8 h-8 text-blue-100" />
-                                    <span className="text-xs font-medium bg-blue-400/30 px-2 py-1 rounded-full">
+                                    <HomeModernIcon className="w-8 h-8 text-white/80" />
+                                    <span className="text-xs font-medium bg-white/20 px-2 py-1 rounded-full">
                                         Total
                                     </span>
                                 </div>
-                                <p className="text-blue-100 text-sm font-medium">Total Beds</p>
+                                <p className="text-white/80 text-sm font-medium">Total Beds</p>
                                 <p className="text-3xl font-bold mt-1">{bedMetrics.totalBeds}</p>
                             </div>
                         </div>
@@ -326,7 +327,22 @@ const OwnerTenantRoster = () => {
 
                     {/* Occupied Beds Card */}
                     <div className="group hover:scale-105 transition-all duration-300">
-                        <div className="bg-gradient-to-br from-red-500 to-red-600 p-6 rounded-2xl shadow-xl text-white relative overflow-hidden">
+                        <div className="bg-gradient-to-br p-6 rounded-2xl shadow-xl text-white relative overflow-hidden" style={{background: `linear-gradient(135deg, ${THEME.secondary.base}, #ea580c)`}}>
+                            <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -mr-10 -mt-10"></div>
+                            <div className="relative z-10">
+                                <div className="flex items-center justify-between mb-4">
+                                    <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                                        <span className="text-sm font-bold">👥</span>
+                                    </div>
+                                    <span className="text-xs font-medium bg-white/20 px-2 py-1 rounded-full">
+                                        Booked
+                                    </span>
+                                </div>
+                                <p className="text-white/80 text-sm font-medium">Occupied Beds</p>
+                                <p className="text-3xl font-bold mt-1">{bedMetrics.occupiedBeds}</p>
+                            </div>
+                        </div>
+                    </div>
                             <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -mr-10 -mt-10"></div>
                             <div className="relative z-10">
                                 <div className="flex items-center justify-between mb-4">
@@ -343,16 +359,16 @@ const OwnerTenantRoster = () => {
 
                     {/* Available Beds Card */}
                     <div className="group hover:scale-105 transition-all duration-300">
-                        <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 p-6 rounded-2xl shadow-xl text-white relative overflow-hidden">
+                        <div className="bg-gradient-to-br p-6 rounded-2xl shadow-xl text-white relative overflow-hidden" style={{background: `linear-gradient(135deg, #06b6d4, #0891b2)`}}>
                             <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -mr-10 -mt-10"></div>
                             <div className="relative z-10">
                                 <div className="flex items-center justify-between mb-4">
-                                    <ClipboardDocumentListIcon className="w-8 h-8 text-emerald-100" />
-                                    <span className="text-xs font-medium bg-emerald-400/30 px-2 py-1 rounded-full">
+                                    <ClipboardDocumentListIcon className="w-8 h-8 text-white/80" />
+                                    <span className="text-xs font-medium bg-white/20 px-2 py-1 rounded-full">
                                         Available
                                     </span>
                                 </div>
-                                <p className="text-emerald-100 text-sm font-medium">Available Beds</p>
+                                <p className="text-white/80 text-sm font-medium">Available Beds</p>
                                 <p className="text-3xl font-bold mt-1">{bedMetrics.availableBeds}</p>
                             </div>
                         </div>
@@ -360,18 +376,18 @@ const OwnerTenantRoster = () => {
 
                     {/* Occupancy Rate Card */}
                     <div className="group hover:scale-105 transition-all duration-300">
-                        <div className="bg-gradient-to-br from-purple-500 to-purple-600 p-6 rounded-2xl shadow-xl text-white relative overflow-hidden">
+                        <div className="bg-gradient-to-br p-6 rounded-2xl shadow-xl text-white relative overflow-hidden" style={{background: `linear-gradient(135deg, #0f766e, ${THEME.primary.base})`}}>
                             <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -mr-10 -mt-10"></div>
                             <div className="relative z-10">
                                 <div className="flex items-center justify-between mb-4">
-                                    <div className="w-8 h-8 rounded-full bg-purple-100/20 flex items-center justify-center">
+                                    <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
                                         <span className="text-sm font-bold">%</span>
                                     </div>
-                                    <span className="text-xs font-medium bg-purple-400/30 px-2 py-1 rounded-full">
+                                    <span className="text-xs font-medium bg-white/20 px-2 py-1 rounded-full">
                                         Rate
                                     </span>
                                 </div>
-                                <p className="text-purple-100 text-sm font-medium">Occupancy Rate</p>
+                                <p className="text-white/80 text-sm font-medium">Occupancy Rate</p>
                                 <p className="text-3xl font-bold mt-1">{bedMetrics.occupancyRate}%</p>
                             </div>
                         </div>
@@ -592,14 +608,16 @@ const OwnerTenantRoster = () => {
                             <div className="flex space-x-3 mb-6">
                                 <button
                                     onClick={() => handleEditRoom(selectedRoom.roomNumber)}
-                                    className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl text-sm hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-lg flex items-center justify-center"
+                                    className="flex-1 px-4 py-2 text-white rounded-xl text-sm transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center"
+                                    style={{background: `linear-gradient(135deg, ${THEME.primary.base}, #0891b2)`}}
                                 >
                                     <PencilSquareIcon className="w-4 h-4 mr-2" />
                                     Edit Room
                                 </button>
                                 <button
                                     onClick={handleDeleteRoom}
-                                    className="flex-1 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl text-sm hover:from-red-600 hover:to-red-700 transition-all duration-200 shadow-lg"
+                                    className="flex-1 px-4 py-2 text-white rounded-xl text-sm transition-all duration-200 shadow-lg hover:shadow-xl"
+                                    style={{background: `linear-gradient(135deg, #ef4444, #dc2626)`}}
                                 >
                                     Delete Room
                                 </button>
@@ -631,13 +649,13 @@ const OwnerTenantRoster = () => {
                                         return (
                                             <div key={tenant._id} className={`flex items-center justify-between p-4 rounded-xl border ${
                                                 isNoticeApproved 
-                                                    ? 'bg-gradient-to-r from-orange-50 to-red-50 border-orange-200' 
+                                                    ? 'bg-gradient-to-r from-violet-50 to-red-50 border-violet-200' 
                                                     : 'bg-gradient-to-r from-gray-50 to-gray-100 border-gray-200'
                                             }`}>
                                                 <div className="flex items-center space-x-3">
                                                     <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold shadow-lg ${
                                                         isNoticeApproved 
-                                                            ? 'bg-gradient-to-br from-orange-500 to-red-600' 
+                                                            ? 'bg-gradient-to-br from-violet-500 to-red-600' 
                                                             : 'bg-gradient-to-br from-indigo-500 to-purple-600'
                                                     }`}>
                                                         {tenant.name.charAt(0)}
@@ -646,7 +664,7 @@ const OwnerTenantRoster = () => {
                                                         <div className="flex items-center space-x-2">
                                                             <span className="font-medium text-gray-800">{tenant.name}</span>
                                                             {isNoticeApproved && (
-                                                                <span className="px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-full font-medium">
+                                                                <span className="px-2 py-1 bg-violet-100 text-violet-800 text-xs rounded-full font-medium">
                                                                     Notice Period
                                                                 </span>
                                                             )}
@@ -654,7 +672,7 @@ const OwnerTenantRoster = () => {
                                                         {tenant.phone && <div className="text-sm text-gray-500">{tenant.phone}</div>}
                                                         <div className="text-xs text-gray-400">Bed: {tenant.bedId}</div>
                                                         {isNoticeApproved && tenant.vacateDate && (
-                                                            <div className="text-xs text-orange-600 font-medium">
+                                                            <div className="text-xs text-violet-600 font-medium">
                                                                 Vacating: {new Date(tenant.vacateDate).toLocaleDateString()}
                                                             </div>
                                                         )}
@@ -710,11 +728,12 @@ const OwnerTenantRoster = () => {
                                         }
                                     }}
                                     disabled={!hasSpace}
-                                    className={`w-full py-3 px-4 rounded-xl transition-all duration-200 flex items-center justify-center shadow-lg ${
-                                        hasSpace 
-                                            ? 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700' 
-                                            : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                    }`}
+                                    className={`w-full py-3 px-4 rounded-xl transition-all duration-200 flex items-center justify-center shadow-lg`}
+                                    style={{
+                                        background: hasSpace ? `linear-gradient(135deg, ${THEME.primary.base}, ${THEME.secondary.base})` : '#e5e7eb',
+                                        color: hasSpace ? 'white' : '#9ca3af',
+                                        cursor: hasSpace ? 'pointer' : 'not-allowed'
+                                    }}
                                 >
                                     <PlusIcon className="w-5 h-5 mr-2" />
                                     {hasSpace ? 'Add Tenant to This Room' : 'Room is at full capacity'}

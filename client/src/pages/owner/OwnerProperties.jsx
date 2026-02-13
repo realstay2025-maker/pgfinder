@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
+import { THEME } from '../../config/theme';
 import { 
     HomeModernIcon, 
     ArrowPathIcon, 
@@ -139,18 +140,20 @@ const OwnerProperties = () => {
         <div className="p-4 md:p-6">
             <div className="flex justify-between items-center mb-6 border-b pb-3">
                 <h1 className="text-2xl md:text-3xl font-bold text-gray-800 flex items-center">
-                    <HomeModernIcon className="w-7 h-7 mr-2 text-primary-dark" /> Your Listed Properties ({properties.length})
+                    <HomeModernIcon className="w-7 h-7 mr-2" style={{color: THEME.primary.base}} /> Your Listed Properties ({properties.length})
                 </h1>
                 <div className="flex gap-3">
                     <button
                         onClick={() => setShowSubscriptionModal(true)}
-                        className="flex items-center py-2 px-4 rounded-md text-white bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 transition text-sm font-medium"
+                        className="flex items-center py-2 px-4 rounded-lg text-white transition text-sm font-medium shadow-lg hover:shadow-xl"
+                        style={{background: `linear-gradient(135deg, ${THEME.primary.base}, ${THEME.secondary.base})`}}
                     >
                         <CreditCardIcon className="w-5 h-5 mr-1" /> Subscribe
                     </button>
                     <Link 
-                        to="/owner/add-property" 
-                        className="flex items-center py-2 px-4 rounded-md text-white bg-primary-dark hover:bg-blue-900 transition text-sm font-medium"
+                        to="/owner/add-property"
+                        className="flex items-center py-2 px-4 rounded-lg text-white transition text-sm font-medium shadow-lg hover:shadow-xl"
+                        style={{background: `linear-gradient(135deg, ${THEME.secondary.base}, ${THEME.primary.base})`}}
                     >
                         <CheckCircleIcon className="w-5 h-5 mr-1" /> Add New Property
                     </Link>

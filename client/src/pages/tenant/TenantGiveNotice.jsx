@@ -3,29 +3,41 @@ import { useAuth } from '../../context/AuthContext';
 import { ExclamationTriangleIcon, CalendarIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
 import axios from 'axios';
 import { API_ENDPOINTS } from '../../config/api';
+import usePageTitle from '../../hooks/usePageTitle';
 
 const TenantGiveNotice = () => {
+    usePageTitle('Give Notice');
     const { user } = useAuth();
     const [formData, setFormData] = useState({
         vacateDate: '',
         reason: ''
     });
     const [notices, setNotices] = useState([]);
+    const [noticesLoading, setNoticesLoading] = useState(true);
+    const [noticesError, setNoticesError] = useState(null);
     const [loading, setLoading] = useState(false);
     const [hasActiveNotice, setHasActiveNotice] = useState(false);
 
     useEffect(() => {
-        fetchNotices();
-    }, []);
+        if (user) {
+            fetchNotices();
+        }
+    }, [user]);
 
     const fetchNotices = async () => {
         try {
+            setNoticesLoading(true);
+            setNoticesError(null);
             const config = { headers: { Authorization: `Bearer ${user.token}` } };
             const res = await axios.get(`${API_ENDPOINTS.NOTICES}/tenant`, config);
-            setNotices(res.data);
-            setHasActiveNotice(res.data.some(notice => notice.status === 'pending'));
+            setNotices(res.data || []);
+            setHasActiveNotice((res.data || []).some(notice => notice.status === 'pending'));
         } catch (err) {
             console.error('Failed to fetch notices:', err);
+            setNoticesError(err.response?.data?.error || 'Failed to load notices');
+            setNotices([]);
+        } finally {
+            setNoticesLoading(false);
         }
     };
 
@@ -77,7 +89,7 @@ const TenantGiveNotice = () => {
     return (
         <div className="p-6 max-w-4xl mx-auto">
             <div className="mb-8">
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent mb-2">
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-red-600 to-violet-600 bg-clip-text text-transparent mb-2">
                     Give Notice to Leave PG
                 </h1>
                 <p className="text-gray-600">Submit your notice to vacate the PG accommodation</p>
@@ -86,7 +98,7 @@ const TenantGiveNotice = () => {
             {!hasActiveNotice && canSubmitNotice() ? (
                 <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-8 border border-white/20 mb-8">
                     <div className="flex items-center mb-6">
-                        <ExclamationTriangleIcon className="w-8 h-8 text-orange-500 mr-3" />
+                        <ExclamationTriangleIcon className="w-8 h-8 text-violet-500 mr-3" />
                         <h2 className="text-2xl font-bold text-gray-900">Submit Notice</h2>
                     </div>
                     
@@ -101,7 +113,7 @@ const TenantGiveNotice = () => {
                                 value={formData.vacateDate}
                                 onChange={(e) => setFormData({...formData, vacateDate: e.target.value})}
                                 min={new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
-                                className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-orange-400 focus:border-orange-400"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-violet-400 focus:border-violet-400"
                                 required
                             />
                             <p className="text-xs text-gray-500 mt-1">Minimum 30 days notice required</p>
@@ -116,7 +128,7 @@ const TenantGiveNotice = () => {
                                 value={formData.reason}
                                 onChange={(e) => setFormData({...formData, reason: e.target.value})}
                                 placeholder="Please provide reason for leaving..."
-                                className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-orange-400 focus:border-orange-400 h-32"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-violet-400 focus:border-violet-400 h-32"
                                 required
                             />
                         </div>
@@ -124,7 +136,7 @@ const TenantGiveNotice = () => {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full bg-gradient-to-r from-red-600 to-orange-600 text-white py-4 rounded-2xl font-semibold hover:from-red-700 hover:to-orange-700 transform hover:scale-105 transition-all duration-200 disabled:opacity-50"
+                            className="w-full bg-gradient-to-r from-red-600 to-violet-600 text-white py-4 rounded-2xl font-semibold hover:from-red-700 hover:to-violet-700 transform hover:scale-105 transition-all duration-200 disabled:opacity-50"
                         >
                             {loading ? 'Submitting...' : 'Submit Notice'}
                         </button>
@@ -148,7 +160,16 @@ const TenantGiveNotice = () => {
             <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-8 border border-white/20">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">Notice History</h2>
                 
-                {notices.length === 0 ? (
+                {noticesLoading ? (
+                    <div className="text-center py-8">
+                        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                        <p className="text-gray-600 mt-4">Loading notice history...</p>
+                    </div>
+                ) : noticesError ? (
+                    <div className="bg-red-50 border border-red-200 rounded-2xl p-4">
+                        <p className="text-red-800 font-medium">{noticesError}</p>
+                    </div>
+                ) : notices.length === 0 ? (
                     <p className="text-gray-500 text-center py-8">No notices submitted yet</p>
                 ) : (
                     <div className="space-y-4">
@@ -157,7 +178,7 @@ const TenantGiveNotice = () => {
                                 <div className="flex justify-between items-start mb-4">
                                     <div>
                                         <p className="font-semibold text-gray-900">
-                                            Notice Date: {new Date(notice.noticeDate).toLocaleDateString()}
+                                            Notice Date: {new Date(notice.noticeDate || notice.createdAt).toLocaleDateString()}
                                         </p>
                                         <p className="text-gray-600">
                                             Vacate Date: {new Date(notice.vacateDate).toLocaleDateString()}

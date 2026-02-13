@@ -192,12 +192,12 @@ const OwnerAnalytics = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Pending Payments</p>
-                  <p className="text-3xl font-bold text-orange-600">₹{metrics.revenue.pending.toLocaleString()}</p>
+                  <p className="text-3xl font-bold text-violet-600">₹{metrics.revenue.pending.toLocaleString()}</p>
                 </div>
-                <ChartBarIcon className="w-12 h-12 text-orange-500" />
+                <ChartBarIcon className="w-12 h-12 text-violet-500" />
               </div>
               <div className="mt-4 flex items-center text-sm">
-                <span className="text-orange-600">-3.2%</span>
+                <span className="text-violet-600">-3.2%</span>
                 <span className="text-gray-500 ml-2">from last month</span>
               </div>
             </div>
@@ -254,7 +254,7 @@ const OwnerAnalytics = () => {
                     <tr key={month.month}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{month.monthName}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-green-600">₹{month.paid.toLocaleString()}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-orange-600">₹{month.pending.toLocaleString()}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-violet-600">₹{month.pending.toLocaleString()}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-red-600">₹{month.overdue.toLocaleString()}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">₹{month.total.toLocaleString()}</td>
                     </tr>
@@ -323,7 +323,7 @@ const OwnerAnalytics = () => {
                     <tr key={month.month}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{month.month}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-green-600">{month.newTenants}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-orange-600">{month.complaints}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-violet-600">{month.complaints}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-red-600">{month.notices}</td>
                     </tr>
                   ))}

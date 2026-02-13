@@ -65,7 +65,7 @@ const OwnerNotices = () => {
     return (
         <div className="p-6 max-w-9xl mx-auto">
             <div className="mb-8">
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent mb-2">
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-violet-600 to-red-600 bg-clip-text text-transparent mb-2">
                     Tenant Notices
                 </h1>
                 <p className="text-gray-600">Manage tenant leave notices and requests</p>
@@ -83,7 +83,7 @@ const OwnerNotices = () => {
                         <div key={notice._id} className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-white/30 p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                             <div className="flex justify-between items-start mb-4">
                                 <div className="flex items-center space-x-4">
-                                    <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                                    <div className="w-12 h-12 bg-gradient-to-br from-violet-500 to-red-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
                                         {notice.tenantId?.name?.charAt(0)}
                                     </div>
                                     <div>

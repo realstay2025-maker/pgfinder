@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
 import { ArrowPathIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { THEME } from '../../config/theme';
 
 import { API_ENDPOINTS } from '../../config/api';
  // Assuming a generic API to fetch owner's rooms
@@ -170,10 +171,10 @@ const OnboardTenantModal = ({ onClose, onSuccess, selectedRoomId = null }) => {
                 </div>*/}
                 
                 {successMessage && (
-                    <div className="bg-green-100 text-accent-green p-4 rounded-md mb-4 text-sm">{successMessage}</div>
+                    <div className="p-4 rounded-md mb-4 text-sm font-medium" style={{backgroundColor: `${THEME.primary.base}20`, color: THEME.primary.base}}>{successMessage}</div>
                 )}
                 {error && (
-                    <div className="bg-red-100 text-custom-red p-4 rounded-md mb-4 text-sm">{error}</div>
+                    <div className="p-4 rounded-md mb-4 text-sm font-medium" style={{backgroundColor: '#ef444420', color: '#ef4444'}}>{error}</div>
                 )}
                 
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -271,10 +272,10 @@ const OnboardTenantModal = ({ onClose, onSuccess, selectedRoomId = null }) => {
                     
                     {/* Action Buttons */}
                     <div className="flex justify-end space-x-3 pt-4">
-                        <button type="button" onClick={onClose} className="py-2 px-4 rounded-md text-gray-700 bg-gray-200 hover:bg-gray-300">
+                        <button type="button" onClick={onClose} className="py-2 px-4 rounded-lg font-medium transition-all border-2" style={{borderColor: THEME.primary.base, color: THEME.primary.base, backgroundColor: `${THEME.primary.base}10`}}>
                             Close
                         </button>
-                        <button type="submit" disabled={loading || !!successMessage} className="py-2 px-4 rounded-md text-white bg-accent-green hover:bg-green-700 transition disabled:opacity-50">
+                        <button type="submit" disabled={loading || !!successMessage} className="py-2 px-4 rounded-lg font-medium text-white transition-all shadow-lg hover:shadow-xl disabled:opacity-50" style={{background: `linear-gradient(135deg, ${THEME.primary.base}, ${THEME.secondary.base})`}}>
                             {loading ? 'Assigning...' : 'Assign Tenant'}
                         </button>
                     </div>

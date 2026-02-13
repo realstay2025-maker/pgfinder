@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { Link } from 'react-router-dom';
+import { THEME } from '../../config/theme';
 import { 
     BuildingStorefrontIcon, 
     UsersIcon, 
@@ -20,8 +21,8 @@ import { API_ENDPOINTS } from '../../config/api';
 const API_OWNER_DASHBOARD = `${API_ENDPOINTS.OWNER}/dashboard-metrics`;
 
 // --- Reusable Metric Card Component ---
-const MetricCard = ({ title, value, icon: Icon, colorClass, link, isLoading }) => (
-    <div className={`bg-white rounded-xl shadow-lg p-5 flex flex-col justify-between transition-all duration-300 transform hover:scale-[1.02] ${colorClass}`}>
+const MetricCard = ({ title, value, icon: Icon, bgColor, iconColor, link, isLoading }) => (
+    <div className="bg-white rounded-2xl shadow-lg p-6 flex flex-col justify-between transition-all duration-300 transform hover:shadow-xl hover:-translate-y-1" style={{borderLeft: `4px solid ${iconColor}`}}>
         <div className="flex items-start justify-between">
             <div>
                 <p className="text-sm font-medium text-gray-500">{title}</p>
@@ -33,12 +34,12 @@ const MetricCard = ({ title, value, icon: Icon, colorClass, link, isLoading }) =
                     )}
                 </div>
             </div>
-            <div className={`p-3 rounded-full bg-opacity-20 ${colorClass.replace('border-', 'bg-').replace('text-gray-900', '')}`}>
-                <Icon className={`w-8 h-8 ${colorClass.replace('border-', 'text-').replace('text-gray-900', 'text-blue-800')}`} />
+            <div className="p-3 rounded-full" style={{backgroundColor: `${iconColor}20`}}>
+                <Icon className="w-8 h-8" style={{color: iconColor}} />
             </div>
         </div>
         {link && (
-            <Link to={link} className="mt-4 text-xs font-semibold flex items-center text-blue-600 hover:text-blue-800 transition">
+            <Link to={link} className="mt-4 text-xs font-semibold flex items-center transition hover:opacity-80" style={{color: iconColor}}>
                 View Details <ArrowTrendingUpIcon className='w-4 h-4 ml-1' />
             </Link>
         )}
@@ -108,10 +109,10 @@ const OwnerDashboardHome = () => {
 
     if (error) {
         return (
-            <div className="p-6 text-custom-red border-l-4 border-custom-red bg-red-100/50 rounded-md shadow-lg">
+            <div className="p-6 border-l-4 rounded-lg shadow-lg" style={{borderColor: '#ef4444', backgroundColor: '#ef444415', color: '#991b1b'}}>
                 <p className="font-semibold">Error Loading Dashboard:</p>
                 <p>{error}</p>
-                <button onClick={fetchDashboardMetrics} className="mt-3 text-sm text-blue-800 hover:underline">Try Refreshing</button>
+                <button onClick={fetchDashboardMetrics} className="mt-3 text-sm hover:underline" style={{color: THEME.primary.base}}>Try Refreshing</button>
             </div>
         );
     }
@@ -119,7 +120,7 @@ const OwnerDashboardHome = () => {
     return (
         <div className="p-4 md:p-8">
             <h1 className="text-3xl font-extrabold text-gray-900 mb-2">
-                Welcome back, <span className="text-blue-700">{user?.name || 'PG Owner'}!</span>
+                Welcome back, <span style={{color: THEME.primary.base}}>{user?.name || 'PG Owner'}!</span>
             </h1>
             <p className="text-lg text-gray-500 mb-8">
                 Here's a quick overview of your PG management portal.
@@ -131,7 +132,7 @@ const OwnerDashboardHome = () => {
                     title="Total Properties"
                     value={metrics.totalProperties || 0}
                     icon={BuildingStorefrontIcon}
-                    colorClass="text-blue-800 border-blue-100"
+                    iconColor={THEME.primary.base}
                     link="/owner/properties"
                     isLoading={loading}
                 />
@@ -139,7 +140,7 @@ const OwnerDashboardHome = () => {
                     title="Active Tenants"
                     value={metrics.activeTenants || 0}
                     icon={UsersIcon}
-                    colorClass="text-green-700 border-green-100"
+                    iconColor={THEME.secondary.base}
                     link="/owner/tenants"
                     isLoading={loading}
                 />
@@ -147,7 +148,7 @@ const OwnerDashboardHome = () => {
                     title="Pending Complaints"
                     value={metrics.pendingComplaints || 0}
                     icon={TicketIcon}
-                    colorClass="text-yellow-700 border-yellow-100"
+                    iconColor="#06b6d4"
                     link="/owner/complaints"
                     isLoading={loading}
                 />
@@ -155,20 +156,21 @@ const OwnerDashboardHome = () => {
                     title="Monthly Dues (Total)"
                     value={metrics.totalMonthlyDues || '₹ 0'} 
                     icon={WalletIcon}
-                    colorClass="text-indigo-700 border-indigo-100"
+                    iconColor="#0f766e"
                     link="/owner/payments"
                     isLoading={loading}
                 />
             </div>
 
             {/* --- Quick Actions / CTA Section --- */}
-            <div className="bg-white p-6 rounded-xl shadow-xl border-t-4 border-blue-700">
+            <div className="bg-white p-6 rounded-2xl shadow-xl" style={{borderTop: `4px solid ${THEME.primary.base}`}}>
                 <h2 className="text-2xl font-semibold text-gray-800 mb-4">Quick Actions</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     
                     <Link
                         to="/owner/add-property"
-                        className="flex items-center justify-center p-4 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg transition duration-200 text-blue-700 font-medium shadow-sm"
+                        className="flex items-center justify-center p-4 rounded-lg transition duration-200 font-medium shadow-sm border-2 hover:shadow-lg hover:-translate-y-1"
+                        style={{backgroundColor: `${THEME.primary.base}15`, borderColor: THEME.primary.base, color: THEME.primary.base}}
                     >
                         <PlusCircleIcon className="w-6 h-6 mr-2" />
                         Add New Property
@@ -176,7 +178,8 @@ const OwnerDashboardHome = () => {
 
                     <Link
                         to="/owner/tenants"
-                        className="flex items-center justify-center p-4 bg-green-50 hover:bg-green-100 border border-green-200 rounded-lg transition duration-200 text-green-700 font-medium shadow-sm"
+                        className="flex items-center justify-center p-4 rounded-lg transition duration-200 font-medium shadow-sm border-2 hover:shadow-lg hover:-translate-y-1"
+                        style={{backgroundColor: `${THEME.secondary.base}15`, borderColor: THEME.secondary.base, color: THEME.secondary.base}}
                     >
                         <UsersIcon className="w-6 h-6 mr-2" />
                         Manage Tenants
@@ -184,7 +187,8 @@ const OwnerDashboardHome = () => {
 
                     <Link
                         to="/owner/inbox"
-                        className="flex items-center justify-center p-4 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-lg transition duration-200 text-purple-700 font-medium shadow-sm relative"
+                        className="flex items-center justify-center p-4 rounded-lg transition duration-200 font-medium shadow-sm border-2 hover:shadow-lg hover:-translate-y-1 relative"
+                        style={{backgroundColor: `${'#06b6d4'}15`, borderColor: '#06b6d4', color: '#06b6d4'}}
                     >
                         <TicketIcon className="w-6 h-6 mr-2" />
                         Inbox
@@ -199,8 +203,8 @@ const OwnerDashboardHome = () => {
 
             {/* Optional: Placeholder for Recent Activity Feed */}
             <div className="mt-10">
-                <h2 className="text-2xl font-semibold text-gray-800 mb-4">Recent Activity</h2>
-                <div className="bg-gray-50 p-6 rounded-xl border border-gray-200 text-gray-500 italic">
+                <h2 className="text-2xl font-semibold text-gray-800 mb-4\">Recent Activity</h2>
+                <div className="p-6 rounded-2xl border border-gray-200 text-gray-500 italic" style={{backgroundColor: '#f8fafc'}}>
                     <p>No recent activity updates to display. (Requires real-time backend feed.)</p>
                 </div>
             </div>

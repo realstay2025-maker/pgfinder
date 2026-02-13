@@ -98,12 +98,94 @@ const TenantSchema = new mongoose.Schema({
         },
         unique: true
     },
+    // New fields from profile form
+    dateOfBirth: {
+        type: Date
+    },
+    age: {
+        type: Number
+    },
+    bloodGroup: {
+        type: String,
+        enum: ['O+', 'O-', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-']
+    },
+    panNumber: {
+        type: String
+    },
+    // Academic/Employment
+    institute: {
+        type: String
+    },
+    designation: {
+        type: String
+    },
+    collegeCompanyId: {
+        type: String
+    },
+    institutionAddress: {
+        type: String
+    },
+    // Emergency Contact
+    emergencyContactName: {
+        type: String
+    },
+    relationship: {
+        type: String
+    },
+    emergencyMobile1: {
+        type: String,
+        validate: {
+            validator: function(v) {
+                return !v || /^[6-9]\d{9}$/.test(v);
+            },
+            message: 'Emergency mobile must be a valid 10-digit number'
+        }
+    },
+    emergencyMobile2: {
+        type: String
+    },
+    // Medical Information
+    medicalConditions: {
+        type: String
+    },
+    allergies: {
+        type: String
+    },
+    regularMedication: {
+        type: String
+    },
+    // Document Submission Flags
+    aadhaarCardSubmitted: {
+        type: Boolean,
+        default: false
+    },
+    panCardSubmitted: {
+        type: Boolean,
+        default: false
+    },
+    collegeIdSubmitted: {
+        type: Boolean,
+        default: false
+    },
+    photographsSubmitted: {
+        type: Boolean,
+        default: false
+    },
     documents: {
         aadhaarCard: {
             type: String // File path
         },
         photo: {
             type: String // File path
+        },
+        panCard: {
+            type: String
+        },
+        collegeId: {
+            type: String
+        },
+        photographs: {
+            type: String
         }
     },
     rent: {

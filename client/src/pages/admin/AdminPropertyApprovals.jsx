@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { API_ENDPOINTS } from '../../config/api';
 import { BuildingStorefrontIcon, CheckCircleIcon, XCircleIcon, EyeIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../../context/AuthContext';
+import { THEME } from '../../config/theme';
 import axios from 'axios';
 import usePageTitle from '../../hooks/usePageTitle';
 
@@ -66,17 +67,17 @@ const AdminPropertyApprovals = () => {
     return (
         <div className="p-6">
             <h1 className="text-3xl font-bold text-gray-800 mb-6 flex items-center">
-                <BuildingStorefrontIcon className="w-8 h-8 mr-2 text-purple-600" />
+                <BuildingStorefrontIcon className="w-8 h-8 mr-2" style={{color: THEME.primary.base}} />
                 Property Approvals
-                <span className="ml-3 bg-purple-100 text-purple-800 text-sm font-medium px-2.5 py-0.5 rounded-full">
+                <span className="ml-3 text-sm font-medium px-2.5 py-0.5 rounded-full" style={{backgroundColor: `${THEME.primary.base}20`, color: THEME.primary.base}}>
                     {properties.length} Pending
                 </span>
             </h1>
             
-            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
                 {properties.length === 0 ? (
                     <div className="text-center py-12">
-                        <CheckCircleIcon className="w-16 h-16 text-green-300 mx-auto mb-4" />
+                        <CheckCircleIcon className="w-16 h-16 mx-auto mb-4" style={{color: THEME.primary.base}} />
                         <h3 className="text-lg font-medium text-gray-900 mb-2">All Caught Up!</h3>
                         <p className="text-gray-500">No properties pending approval.</p>
                     </div>

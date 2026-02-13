@@ -11,7 +11,7 @@ const { encrypt } = require('../utils/encryption');
 // Original functions for backward compatibility
 const registerUser = async (req, res) => {
   try {
-    const { name, email, password, role, phone, gender } = req.body;
+    const { name, email, password, role, phone, gender, pgName } = req.body;
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -21,16 +21,23 @@ const registerUser = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 12);
     const encryptedPhone = phone ? encrypt(phone) : null;
 
-    const user = new User({
+    const userObject = {
       name,
       email,
       password: hashedPassword,
       role: role || 'tenant',
       phone: encryptedPhone,
-      gender
-    });
+      gender,
+      tenantProfile: {
+        pgName: role === 'tenant' ? (pgName || '') : '',
+        isAssigned: false
+      }
+    };
 
+    const user = new User(userObject);
     await user.save();
+
+    console.log('User registered with pgName:', { pgName: user.tenantProfile.pgName });
 
     const token = jwt.sign(
       { id: user._id, role: user.role },
@@ -45,16 +52,11 @@ const registerUser = async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
-      gender: user.gender
-      // user: {
-      //   id: user._id,
-      //   name: user.name,
-      //   email: user.email,
-      //   role: user.role,
-      //   gender: user.gender
-      // }
+      gender: user.gender,
+      pgName: user.tenantProfile.pgName || ''
     });
   } catch (error) {
+    console.error('Registration error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
@@ -194,7 +196,7 @@ const changePassword = async (req, res) => {
 
 const register = async (req, res) => {
   try {
-    const { name, email, password, role, phone, gender } = req.body;
+    const { name, email, password, role, phone, gender, pgName } = req.body;
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -206,16 +208,23 @@ const register = async (req, res) => {
     // Encrypt sensitive data
     const encryptedPhone = phone ? encrypt(phone) : null;
 
-    const user = new User({
+    const userObject = {
       name,
       email,
       password: hashedPassword,
       role: role || 'tenant',
       phone: encryptedPhone,
-      gender
-    });
+      gender,
+      tenantProfile: {
+        pgName: role === 'tenant' ? (pgName || '') : '',
+        isAssigned: false
+      }
+    };
 
+    const user = new User(userObject);
     await user.save();
+
+    console.log('User registered with pgName:', { pgName: user.tenantProfile.pgName });
 
     const token = jwt.sign(
       { id: user._id, role: user.role },
@@ -244,10 +253,12 @@ const register = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        gender: user.gender
+        gender: user.gender,
+        pgName: user.tenantProfile.pgName || ''
       }
     });
   } catch (error) {
+    console.error('Registration error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };

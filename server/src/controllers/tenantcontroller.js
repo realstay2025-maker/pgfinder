@@ -142,18 +142,56 @@ const getTenantProfile = async (req, res) => {
         }
         
         const profileData = {
+            // Personal Details
             pgName: pgName || 'Not selected',
+            fullName: tenant?.name || user.name || '',
+            dateOfBirth: tenant?.dateOfBirth || '',
+            age: tenant?.age || '',
+            bloodGroup: tenant?.bloodGroup || '',
+            aadhaarNumber: tenant?.aadhaarNumber || '',
+            panNumber: tenant?.panNumber || '',
             phone: tenant?.phone || '',
-            address: tenant?.address || '',
+            email: user.email || '',
             permanentAddress: tenant?.permanentAddress || '',
-            emergencyContact: tenant?.emergencyContact || '',
+            
+            // Academic/Employment
+            institute: tenant?.institute || '',
+            designation: tenant?.designation || '',
+            collegeCompanyId: tenant?.collegeCompanyId || '',
+            institutionAddress: tenant?.institutionAddress || '',
+            
+            // Emergency Contact
+            emergencyContactName: tenant?.emergencyContactName || '',
+            relationship: tenant?.relationship || '',
+            emergencyMobile1: tenant?.emergencyMobile1 || '',
+            emergencyMobile2: tenant?.emergencyMobile2 || '',
+            
+            // Medical
+            medicalConditions: tenant?.medicalConditions || '',
+            allergies: tenant?.allergies || '',
+            regularMedication: tenant?.regularMedication || '',
+            
+            // Documents
+            aadhaarCardSubmitted: tenant?.aadhaarCardSubmitted || false,
+            panCardSubmitted: tenant?.panCardSubmitted || false,
+            collegeIdSubmitted: tenant?.collegeIdSubmitted || false,
+            photographsSubmitted: tenant?.photographsSubmitted || false,
+            documents: tenant?.documents || {},
+            
+            // Legacy fields for compatibility
+            address: tenant?.address || '',
             occupation: tenant?.occupation || '',
             occupationType: tenant?.occupationType || 'working',
             companyName: tenant?.companyName || '',
             collegeName: tenant?.collegeName || '',
-            aadhaarNumber: tenant?.aadhaarNumber || '',
-            documents: tenant?.documents || {},
-            profileCompleted: !!(tenant?.phone && tenant?.address && tenant?.permanentAddress && tenant?.emergencyContact && tenant?.occupation && tenant?.aadhaarNumber)
+            emergencyContact: tenant?.emergencyMobile1 || '',
+            
+            profileCompleted: !!(
+                tenant?.phone && tenant?.permanentAddress && 
+                tenant?.dateOfBirth && tenant?.aadhaarNumber && 
+                tenant?.institute && tenant?.designation &&
+                tenant?.emergencyContactName && tenant?.medicalConditions
+            )
         };
         
         res.json(profileData);
@@ -163,50 +201,6 @@ const getTenantProfile = async (req, res) => {
     }
 };
 
-// Validation helper function
-const validateTenantProfile = (data) => {
-    const errors = [];
-    
-    // Phone validation
-    if (!data.phone || !/^[6-9]\d{9}$/.test(data.phone)) {
-        errors.push('Phone number must be a valid 10-digit Indian mobile number');
-    }
-    
-    // Aadhaar validation
-    if (!data.aadhaarNumber || !/^\d{12}$/.test(data.aadhaarNumber)) {
-        errors.push('Aadhaar number must be exactly 12 digits');
-    }
-    
-    // Emergency contact validation
-    if (!data.emergencyContact || !/^[6-9]\d{9}$/.test(data.emergencyContact)) {
-        errors.push('Emergency contact must be a valid 10-digit mobile number');
-    }
-    
-    // Address validation
-    if (!data.address || data.address.trim().length < 10) {
-        errors.push('Current address must be at least 10 characters');
-    }
-    
-    if (!data.permanentAddress || data.permanentAddress.trim().length < 10) {
-        errors.push('Permanent address must be at least 10 characters');
-    }
-    
-    // Occupation validation
-    if (!data.occupation || data.occupation.trim().length < 2) {
-        errors.push('Occupation/Course is required');
-    }
-    
-    // Occupation type specific validation
-    if (data.occupationType === 'working' && (!data.companyName || data.companyName.trim().length < 2)) {
-        errors.push('Company name is required for working professionals');
-    }
-    
-    if (data.occupationType === 'student' && (!data.collegeName || data.collegeName.trim().length < 2)) {
-        errors.push('College/University name is required for students');
-    }
-    
-    return errors;
-};
 
 // Update tenant profile
 const updateTenantProfile = async (req, res) => {
@@ -217,56 +211,89 @@ const updateTenantProfile = async (req, res) => {
         }
 
         const {
-            phone, address, permanentAddress, emergencyContact, 
-            occupation, occupationType, companyName, collegeName, aadhaarNumber
+            fullName, dateOfBirth, age, bloodGroup, panNumber,
+            phone, email, permanentAddress, pgName,
+            institute, designation, collegeCompanyId, institutionAddress,
+            emergencyContactName, relationship, emergencyMobile1, emergencyMobile2,
+            medicalConditions, allergies, regularMedication,
+            aadhaarCardSubmitted, panCardSubmitted, collegeIdSubmitted, photographsSubmitted,
+            aadhaarNumber
         } = req.body;
         
-        // Validate input data
-        const validationErrors = validateTenantProfile(req.body);
-        if (validationErrors.length > 0) {
-            return res.status(400).json({ error: validationErrors.join('. ') });
-        }
-        
-        // Check if files are uploaded
-        if (!req.files || !req.files.aadhaarCard || !req.files.photo) {
-            return res.status(400).json({ error: 'Both Aadhaar card and photo are required' });
-        }
-
         // Handle file uploads
-        const documents = {
-            aadhaarCard: req.files.aadhaarCard[0].path,
-            photo: req.files.photo[0].path
-        };
+        const documents = {};
+        if (req.files?.photo?.[0]) {
+            documents.photo = req.files.photo[0].path;
+        }
+        if (req.files?.aadhaarCard?.[0]) {
+            documents.aadhaarCard = req.files.aadhaarCard[0].path;
+        }
+        if (req.files?.panCard?.[0]) {
+            documents.panCard = req.files.panCard[0].path;
+        }
+        if (req.files?.collegeId?.[0]) {
+            documents.collegeId = req.files.collegeId[0].path;
+        }
+        if (req.files?.photographs?.[0]) {
+            documents.photographs = req.files.photographs[0].path;
+        }
 
         // Find or create tenant record
         let tenant = await Tenant.findOne({ userId: user._id });
         
         const tenantData = {
             userId: user._id,
-            name: user.name,
-            email: user.email,
-            phone,
-            address,
-            permanentAddress,
-            emergencyContact,
-            occupation,
-            occupationType,
-            companyName: occupationType === 'working' ? companyName : '',
-            collegeName: occupationType === 'student' ? collegeName : '',
+            name: fullName || user.name,
+            email: email || user.email,
+            // Personal Details
+            dateOfBirth,
+            age: parseInt(age),
+            bloodGroup,
             aadhaarNumber,
+            panNumber,
+            phone,
+            permanentAddress,
+            pgName,
+            // Academic/Employment
+            institute,
+            designation,
+            collegeCompanyId,
+            institutionAddress,
+            // Emergency Contact
+            emergencyContactName,
+            relationship,
+            emergencyMobile1,
+            emergencyMobile2,
+            // Medical Information
+            medicalConditions,
+            allergies,
+            regularMedication,
+            // Document flags
+            aadhaarCardSubmitted: aadhaarCardSubmitted === 'true' || aadhaarCardSubmitted === true,
+            panCardSubmitted: panCardSubmitted === 'true' || panCardSubmitted === true,
+            collegeIdSubmitted: collegeIdSubmitted === 'true' || collegeIdSubmitted === true,
+            photographsSubmitted: photographsSubmitted === 'true' || photographsSubmitted === true,
             documents: tenant?.documents ? { ...tenant.documents, ...documents } : documents,
             status: 'profile_completed',
             profileCompletedAt: new Date()
         };
 
         if (tenant) {
-            tenant = await Tenant.findByIdAndUpdate(tenant._id, tenantData, { new: true });
+            Object.assign(tenant, tenantData);
+            await tenant.save();
         } else {
             tenant = new Tenant(tenantData);
             await tenant.save();
         }
 
-        const profileCompleted = !!(phone && address && permanentAddress && emergencyContact && occupation && aadhaarNumber);
+        // Check if profile is truly complete
+        const requiredFields = [
+            fullName, dateOfBirth, age, bloodGroup, aadhaarNumber, panNumber,
+            phone, permanentAddress, institute, designation,
+            emergencyContactName, relationship, emergencyMobile1,
+            medicalConditions, allergies, regularMedication
+        ];
+        const profileCompleted = requiredFields.every(field => field && String(field).trim());
         
         res.json({ 
             message: 'Profile updated successfully',
@@ -275,7 +302,7 @@ const updateTenantProfile = async (req, res) => {
         });
     } catch (err) {
         console.error('Update profile error:', err);
-        res.status(500).json({ error: 'Failed to update profile' });
+        res.status(500).json({ error: 'Failed to update profile', details: err.message });
     }
 };
 

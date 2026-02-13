@@ -90,7 +90,7 @@ const OwnerPaymentsDashboard = () => {
         } else if (daysDiff < 0) {
             return { status: 'overdue', color: 'red', text: `Overdue (${Math.abs(daysDiff)} days)` };
         } else if (daysDiff <= 3) {
-            return { status: 'due_soon', color: 'orange', text: `Due in ${daysDiff} days` };
+            return { status: 'due_soon', color: 'violet', text: `Due in ${daysDiff} days` };
         } else {
             return { status: 'pending', color: 'yellow', text: 'Pending' };
         }
@@ -217,7 +217,7 @@ const OwnerPaymentsDashboard = () => {
                                                 <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
                                                     paymentStatus.color === 'green' ? 'bg-green-100 text-green-800' :
                                                     paymentStatus.color === 'red' ? 'bg-red-100 text-red-800' :
-                                                    paymentStatus.color === 'orange' ? 'bg-orange-100 text-orange-800' :
+                                                    paymentStatus.color === 'violet' ? 'bg-violet-100 text-violet-800' :
                                                     'bg-yellow-100 text-yellow-800'
                                                 }`}>
                                                     {paymentStatus.color === 'green' && <CheckCircleIcon className="w-3 h-3 mr-1" />}

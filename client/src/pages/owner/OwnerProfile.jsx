@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { UserIcon, DocumentCheckIcon, CogIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
+import { UserIcon, DocumentCheckIcon, CogIcon, ShieldCheckIcon, KeyIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../../context/AuthContext';
-import ChangePassword from '../../components/ChangePassword';
+import { Link } from 'react-router-dom';
 import OwnerKYCForm from './OwnerKYCForm';
 import usePageTitle from '../../hooks/usePageTitle';
 
@@ -106,8 +106,21 @@ const OwnerProfile = () => {
                                 Security Settings
                             </h2>
                         </div>
-                        <div className="">
-                            <ChangePassword />
+                        <div className="p-8">
+                            <div className="bg-blue-50 rounded-lg p-6 border border-blue-200">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center">
+                                        <KeyIcon className="w-6 h-6 text-blue-600 mr-3" />
+                                        <div>
+                                            <h3 className="font-semibold text-gray-900">Change Password</h3>
+                                            <p className="text-sm text-gray-600">Update your password to keep your account secure</p>
+                                        </div>
+                                    </div>
+                                    <Link to="/owner/change-password" className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-medium hover:from-blue-700 hover:to-blue-800 transition-all duration-200">
+                                        Change Password
+                                    </Link>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 )}

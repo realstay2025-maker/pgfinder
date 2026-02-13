@@ -452,6 +452,8 @@ exports.assignTenant = async (req, res) => {
         
         // Create tenant in Tenant collection
         const newTenant = new Tenant({
+            userId: tenantData.userId,
+            ownerId: req.user._id,
             propertyId,
             roomId: room._id,
             bedId,

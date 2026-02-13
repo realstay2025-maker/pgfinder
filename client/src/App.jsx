@@ -36,6 +36,7 @@ import OwnerInbox from './pages/owner/OwnerInbox';
 import OwnerProfile from './pages/owner/OwnerProfile';
 import OwnerAnalytics from './pages/owner/OwnerAnalytics';
 import OwnerAI from './pages/owner/OwnerAI';
+import OwnerChangePassword from './pages/owner/OwnerChangePassword';
 
 // --- TENANT IMPORTS ---
 import TenantLayout from './components/Tenant/TenantLayout';
@@ -46,6 +47,7 @@ import TenantSubmitComplaint from './pages/tenant/TenantSubmitComplaint';
 import TenantPaymentsDashboard from './pages/tenant/TenantPaymentsDashboard';
 import TenantDocumentsDashboard from './pages/tenant/TenantDocumentDashboard';
 import TenantGiveNotice from './pages/tenant/TenantGiveNotice';
+import TenantChangePassword from './pages/tenant/TenantChangePassword';
 
 // --- ADMIN IMPORTS ---
 import AdminLayout from './components/Admin/AdminLayout'; // The simple layout wrapper
@@ -56,6 +58,7 @@ import AdminUserManagement from './pages/admin/AdminUserManagement';
 import AdminSettings from './pages/admin/AdminSettings';
 import AdminSubscriptions from './pages/admin/AdminSubscriptions';
 import AdminAnalytics from './pages/admin/AdminAnalytics';
+import AdminChangePassword from './pages/admin/AdminChangePassword';
 
 function App() {
   return (
@@ -89,6 +92,7 @@ function App() {
               <Route path="subscriptions" element={<AdminSubscriptions />} /> {/* /admin/subscriptions */}
               <Route path="analytics" element={<AdminAnalytics />} /> {/* /admin/analytics */}
               <Route path="settings" element={<AdminSettings />} /> {/* /admin/settings */}
+              <Route path="change-password" element={<AdminChangePassword />} /> {/* /admin/change-password */}
             </Route>
           </Route>
 
@@ -105,6 +109,7 @@ function App() {
               <Route path="submit-complaint" element={<TenantSubmitComplaint />} /> 
               <Route path="documents" element={<TenantDocumentsDashboard />} />
               <Route path="give-notice" element={<TenantGiveNotice />} />
+              <Route path="change-password" element={<TenantChangePassword />} />
             </Route>
           </Route>
 
@@ -127,6 +132,7 @@ function App() {
                 <Route path="invoices" element={<OwnerInvoices />} /> {/* /owner/invoices */}
                 <Route path="analytics" element={<OwnerAnalytics />} /> {/* /owner/analytics */}
                 <Route path="ai" element={<OwnerAI />} /> {/* /owner/ai */}
+                <Route path="change-password" element={<OwnerChangePassword />} /> {/* /owner/change-password */}
                 <Route path="profile" element={<OwnerProfile />} /> {/* /owner/profile */}
                 <Route path="edit-property/:id" element={<EditPropertyPage />} /> {/* /owner/edit-property/:id */}
                 <Route path="rooms/:propertyId" element={<RoomManagement />} /> {/* /owner/rooms/:propertyId */}
